@@ -66,12 +66,13 @@ class RoleServiceStore extends Service implements ServiceStore
      */
     public function update($id, Request $request)
     {
-            $data = $request->only($this->model->getFillable());
-            $role = $this->roleRepositoryStore->update($id, $data);
-            if ($role)
-                $roleObject = $this->roleRepositoryShow->find($id);
+        $data = $request->only($this->model->getFillable());
+        $role = $this->roleRepositoryStore->update($id, $data);
+        if ($role) {
+            $roleObject = $this->roleRepositoryShow->find($id);
             $this->roleRepositoryStore->syncPermissions($request->selected, $roleObject);
-            return $role;
+        }
+        return $role;
 //
     }
 
