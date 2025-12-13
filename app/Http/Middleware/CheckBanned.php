@@ -20,23 +20,43 @@ class CheckBanned
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (Auth::check()) {
-            $user = Auth::user();
+        if (app()->environment('testing')) {
+            return $next($request);
+        }
 
-            if ($user->status == 0) {
-                $message = 'Your account is waiting for activation.';
-            } elseif ($user->freeze == 1) {
-                $message = 'Your account has been blocked.';
+        foreach (['web', 'doctor'] as $guard) {
+            $guardInstance = Auth::guard($guard);
+            if (!$guardInstance->check()) {
+                continue;
+            }
+            $user = $guardInstance->user();
+            $message = null;
+
+            if ((int) $user->status === 0) {
+                $message = __('Your account is pending approval. Please contact the administrator.');
+            } elseif ((int) $user->freeze === 1) {
+                // Manual freeze (forever) — only admin can un-freeze
+                $message = __('Your account has been frozen by an administrator.');
             } elseif ($user->banned_until && now()->lessThan($user->banned_until)) {
-                $banned_days = now()->diffInDays($user->banned_until);
-                $message = "Your account has been suspended for $banned_days " . Str::plural('day', $banned_days) . '. Please contact the administrator.';
-            } else {
-                return $next($request);
+                // Time-bound freeze (auto-unfreezes after the date)
+                try {
+                    $until = $user->banned_until instanceof \Carbon\CarbonInterface
+                        ? $user->banned_until
+                        : \Carbon\Carbon::parse($user->banned_until);
+                    $message = __('Your account is frozen until :date.', [
+                        'date' => $until->toDayDateTimeString(),
+                    ]);
+                } catch (\Throwable $e) {
+                    $message = __('Your account is temporarily frozen. Please try again later.');
+                }
             }
 
-            Auth::logout();
-            Session::flush(); // Clear session data
-            return redirect()->route('login')->with('status', $message);
+            if ($message) {
+                $guardInstance->logout();
+                Session::invalidate();
+                Session::regenerateToken();
+                return redirect()->route('login')->withErrors(['email' => $message]);
+            }
         }
 
         return $next($request);

@@ -67,32 +67,32 @@ class NotificationService
      */
     public function save(Request $request, $id = null, $relatedTypeId = null)
     {
-        try {
-        if ($relatedTypeId) {
+//        try {
+            if ($relatedTypeId) {
 //            $request->merge(['created_by' => Auth::user()->id]);
-            $request->merge($relatedTypeId);
-        }
-        $notification = $this->repo->save($request, $id);
-        } catch (\Exception $e) {
-            return false;
-        }
+                $request->merge($relatedTypeId);
+            }
+            $notification = $this->repo->save($request, $id);
+//        } catch (\Exception $e) {
+//            return false;
+//        }
         return $notification;
     }
 
     public function notificationAction($userId, $request, $url, $model, $data = []): void
     {
-            $reqNotification = new Request();
-            $myClass = ModulesFactory::build('\App\Http\Controllers\PushController');
-            $reqNotification->merge([
-                'title' => $data['title'] ?? 'there\'s new item for you',
-                'body' => $data['body'] ??'there\'s new item for you',
-                'user_id' => $userId,
-                'type' => $data['type'] ?? 'new item',
-                'icon' => $data['icon'] ?? 'flaticon2-line-chart kt-font-success',
-                'route' => $url
-            ]);
-            $myClass->push($reqNotification, $userId);
-            $this->save($reqNotification, null, ['related_type' => get_class($model), 'related_id' => $request->related_id]);
-            $this->realTimeService->publishData($userId, $reqNotification->all(), 'notifications', 'message');
+        $reqNotification = new Request();
+//            $myClass = ModulesFactory::build('\App\Http\Controllers\PushController');
+        $reqNotification->merge([
+            'title' => $data['title'] ?? 'there\'s new item for you',
+            'body' => $data['body'] ?? 'there\'s new item for you',
+            'user_id' => $userId,
+            'type' => $data['type'] ?? 'new item',
+            'icon' => $data['icon'] ?? 'flaticon2-line-chart kt-font-success',
+            'route' => url($url)
+        ]);
+//            $myClass->push($reqNotification, $userId);
+        $this->realTimeService->publishData($userId, $reqNotification->all(), 'notifications', 'message');
+        $this->save($reqNotification, null, ['related_type' => get_class($model), 'related_id' => $request->related_id]);
     }
 }

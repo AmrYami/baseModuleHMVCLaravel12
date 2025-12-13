@@ -5,7 +5,7 @@
             <input type="text" class="form-control"
             name='name' placeholder="@lang('forms.Name')"
                     value="{{ $role->name??(old('name')??'') }}"
-                    maxlength="255" minlength="3" autocomplete="off"
+                    maxlength="255" minlength="1" autocomplete="off"
                     @if(isset($role->id) && in_array($role->id , [1,2,3,4])) readonly @endif
                      required/>
             <label for="floatingInput">Name (English) <span class='text-danger'>*</span></label>
@@ -16,7 +16,6 @@
         <!--end::Input group-->
     </div>
 </div>
-
 @foreach($allPermissions->groupBy('permission_group') as $groupName => $groupPermissions )
     @if(($loop->iteration) % 2 != 0  )
         <div class="row">
@@ -62,6 +61,6 @@
 
 @push('js')
 
-    <script src="{{asset('assets/js/roles/list/add.js')}}"></script>
+    <script src="{{asset('assets/js/roles/list/add.js')}}" nonce="{{ csp_nonce() }}"></script>
     {{--		<script src="{{asset('assets/js/custom/apps/user-management/roles/list/update-role.js')}}"></script>--}}
 @endpush

@@ -3,7 +3,7 @@
             <!--begin::Brand-->
             <div class="brand flex-column-auto" id="kt_brand">
                 <!--begin::Logo-->
-                <a href="index.html" class="brand-logo">
+                <a href="{{route('index')}}" class="brand-logo">
                     <img alt="Logo" class="w-75" src="https://cdn.prod.website-files.com/62f3e6d489b8b9be90c5b53e/65e5b683ed1bc4b269d95d02_FCG-Logo-2024.png" />
                 </a>
                 <!--end::Logo-->
@@ -47,7 +47,7 @@
                             </a>
                         </li>
                         <li class="menu-section">
-                            <h4 class="menu-text">Custom</h4>
+                            <h4 class="menu-text">{{ __('sidebar.Management') }}</h4>
                             <i class="menu-icon ki ki-bold-more-hor icon-md"></i>
                         </li>
                         <li class="menu-item menu-item-submenu" aria-haspopup="true" data-menu-toggle="hover">
@@ -81,7 +81,7 @@
 											</span>
                                     </li>
                                     <li class="menu-item" aria-haspopup="true">
-                                        <a href="{{route("users.create")}}" class="menu-link">
+                                        <a href="{{route("dashboard.users.create")}}" class="menu-link">
                                             <i class="menu-bullet menu-bullet-dot">
                                                 <span></span>
                                             </i>
@@ -89,7 +89,7 @@
                                         </a>
                                     </li>
                                     <li class="menu-item" aria-haspopup="true">
-                                        <a href="{{route("users.index")}}" class="menu-link">
+                                        <a href="{{route("dashboard.users.index")}}" class="menu-link">
                                             <i class="menu-bullet menu-bullet-dot">
                                                 <span></span>
                                             </i>
@@ -130,7 +130,7 @@
 											</span>
                                     </li>
                                     <li class="menu-item" aria-haspopup="true">
-                                        <a href="{{route("roles.create")}}" class="menu-link">
+                                        <a href="{{route("dashboard.roles.create")}}" class="menu-link">
                                             <i class="menu-bullet menu-bullet-dot">
                                                 <span></span>
                                             </i>
@@ -138,20 +138,67 @@
                                         </a>
                                     </li>
                                     <li class="menu-item" aria-haspopup="true">
-                                        <a href="{{route("roles.index")}}" class="menu-link">
+                                        <a href="{{route("dashboard.roles.index")}}" class="menu-link">
                                             <i class="menu-bullet menu-bullet-dot">
                                                 <span></span>
                                             </i>
                                             <span class="menu-text">{{__('sidebar.Roles')}}</span>
                                         </a>
                                     </li>
-                                </ul>l
+                                </ul>
                             </div>
                         </li>
-                        <li class="menu-section">
-                            <h4 class="menu-text">Layout</h4>
-                            <i class="menu-icon ki ki-bold-more-hor icon-md"></i>
+
+                        <li class="menu-item menu-item-submenu" aria-haspopup="true" data-menu-toggle="hover">
+                            <a href="javascript:;" class="menu-link menu-toggle">
+									<span class="svg-icon menu-icon">
+										<!--begin::Svg Icon | path:assets/media/svg/icons/Code/Compiling.svg-->
+										<svg xmlns="http://www.w3.org/2000/svg"
+                                             xmlns:xlink="http://www.w3.org/1999/xlink" width="24px" height="24px"
+                                             viewBox="0 0 24 24" version="1.1">
+											<g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+												<rect x="0" y="0" width="24" height="24" />
+												<path
+                                                    d="M2.56066017,10.6819805 L4.68198052,8.56066017 C5.26776695,7.97487373 6.21751442,7.97487373 6.80330086,8.56066017 L8.9246212,10.6819805 C9.51040764,11.267767 9.51040764,12.2175144 8.9246212,12.8033009 L6.80330086,14.9246212 C6.21751442,15.5104076 5.26776695,15.5104076 4.68198052,14.9246212 L2.56066017,12.8033009 C1.97487373,12.2175144 1.97487373,11.267767 2.56066017,10.6819805 Z M14.5606602,10.6819805 L16.6819805,8.56066017 C17.267767,7.97487373 18.2175144,7.97487373 18.8033009,8.56066017 L20.9246212,10.6819805 C21.5104076,11.267767 21.5104076,12.2175144 20.9246212,12.8033009 L18.8033009,14.9246212 C18.2175144,15.5104076 17.267767,15.5104076 16.6819805,14.9246212 L14.5606602,12.8033009 C13.9748737,12.2175144 13.9748737,11.267767 14.5606602,10.6819805 Z"
+                                                    fill="#000000" opacity="0.3" />
+												<path
+                                                    d="M8.56066017,16.6819805 L10.6819805,14.5606602 C11.267767,13.9748737 12.2175144,13.9748737 12.8033009,14.5606602 L14.9246212,16.6819805 C15.5104076,17.267767 15.5104076,18.2175144 14.9246212,18.8033009 L12.8033009,20.9246212 C12.2175144,21.5104076 11.267767,21.5104076 10.6819805,20.9246212 L8.56066017,18.8033009 C7.97487373,18.2175144 7.97487373,17.267767 8.56066017,16.6819805 Z M8.56066017,4.68198052 L10.6819805,2.56066017 C11.267767,1.97487373 12.2175144,1.97487373 12.8033009,2.56066017 L14.9246212,4.68198052 C15.5104076,5.26776695 15.5104076,6.21751442 14.9246212,6.80330086 L12.8033009,8.9246212 C12.2175144,9.51040764 11.267767,9.51040764 10.6819805,8.9246212 L8.56066017,6.80330086 C7.97487373,6.21751442 7.97487373,5.26776695 8.56066017,4.68198052 Z"
+                                                    fill="#000000" />
+											</g>
+										</svg>
+                                        <!--end::Svg Icon-->
+									</span>
+                                <span class="menu-text"> {{__('sidebar.Setting')}}</span>
+                                <i class="menu-arrow"></i>
+                            </a>
+                            <div class="menu-submenu">
+                                <i class="menu-arrow"></i>
+                                <ul class="menu-subnav">
+                                    <li class="menu-item menu-item-parent" aria-haspopup="true">
+											<span class="menu-link">
+												<span class="menu-text"> {{__('sidebar.Setting')}}</span>
+											</span>
+                                    </li>
+                                    <li class="menu-item" aria-haspopup="true">
+                                        <a href="{{route("dashboard.setting.edit", ['key' => 'notifications'])}}" class="menu-link">
+                                            <i class="menu-bullet menu-bullet-dot">
+                                                <span></span>
+                                            </i>
+                                            <span class="menu-text">{{__('sidebar.Notifications')}}</span>
+                                        </a>
+                                    </li>
+                                    <li class="menu-item" aria-haspopup="true">
+                                        <a href="{{route("dashboard.roles.index")}}" class="menu-link">
+                                            <i class="menu-bullet menu-bullet-dot">
+                                                <span></span>
+                                            </i>
+                                            <span class="menu-text">{{__('sidebar.Roles')}}</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
                         </li>
+
                       </ul>
                     <!--end::Menu Nav-->
                 </div>

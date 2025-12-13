@@ -52,6 +52,15 @@
     </div>
     <!--end::Menu item-->
 @endif
+    @if (\Request::route()->getName() == "dashboard.doctors.index")
+    <!--begin::Menu item-->
+    <div class="menu-item px-3">
+        <a href="{{route('dashboard.doctors.export')}}" class="menu-link px-3" >
+            @lang('common.Export Doctors For Marketing')
+        </a>
+    </div>
+    <!--end::Menu item-->
+@endif
 </div>
 <!--end::Menu-->
 <!--end::Export dropdown-->

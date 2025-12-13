@@ -14,26 +14,18 @@ return new class extends Migration
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->json('name')->nullable();
-//            $table->json('specialization')->nullable();
-//            $table->json('hospital')->nullable();
-//            $table->json('designation')->nullable();
-//            $table->json('specialty')->nullable();
-//            $table->json('languages')->nullable();
-//            $table->json('experience')->nullable();
-//            $table->json('description')->nullable();
-//            $table->json('achievements')->nullable();
-//            $table->json('studies')->nullable();
-//            $table->json('work_experience')->nullable();
             $table->string('user_name')->unique();
             $table->string('email')->unique();
             $table->string('mobile', 35)->unique();
             $table->timestamp('email_verified_at')->nullable();
+            $table->string('slug')->nullable();
             $table->string('status')->default(1);
+            $table->boolean('approve')->default(0);
             $table->string('code')->unique();
             $table->string('password');
             $table->rememberToken();
             $table->foreignId('current_team_id')->nullable();
-//            $table->string('profile_photo_path', 2048)->nullable();
+            $table->string('profile_photo_path', 2048)->nullable();
             $table->timestamps();
         });
 

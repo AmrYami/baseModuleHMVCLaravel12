@@ -25,7 +25,37 @@ class users extends Seeder
                 'type' => 'crm admin',
                 'code' => uniqid(),
                 'status' => 1
-            ]
+            ],
+            [
+                'name' => json_encode(['en' => 'HR', 'ar' => 'HR']),
+                'user_name' => 'HR',
+                'email' => 'hr@fakeeh.com',
+                'mobile' => '01011426275',
+                'password'=> Hash::make('hr@fakeeh.com'),
+                'type' => 'hr',
+                'code' => uniqid(),
+                'status' => 1
+            ],
+            [
+                'name' => json_encode(['en' => 'COO', 'ar' => 'COO']),
+                'user_name' => 'COO',
+                'email' => 'coo@fakeeh.com',
+                'mobile' => '01011426285',
+                'password'=> Hash::make('coo@fakeeh.com'),
+                'type' => 'coo',
+                'code' => uniqid(),
+                'status' => 1
+            ],
+            [
+                'name' => json_encode(['en' => 'Marketing', 'ar' => 'Marketing']),
+                'user_name' => 'Marketing',
+                'email' => 'marketing@fakeeh.com',
+                'mobile' => '01011426254',
+                'password'=> Hash::make('marketing@fakeeh.com'),
+                'type' => 'marketing',
+                'code' => uniqid(),
+                'status' => 1
+            ],
         ];
         User::insert($data);
     }

@@ -40,6 +40,10 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+        'doctor' => [
+            'driver' => 'session',
+            'provider' => 'doctors',
+        ],
         'api' => [
             'driver' => 'jwt',
             'provider' => 'users',
@@ -67,7 +71,12 @@ return [
     'providers' => [
         'users' => [
             'driver' => 'eloquent',
-            'model' => Users\Models\User::class,
+            'model' => \Users\Models\User::class,
+        ],
+
+        'doctors' => [
+            'driver' => 'eloquent',
+            'model' => \Users\Models\Doctor::class,
         ],
 
         // 'users' => [
@@ -99,8 +108,14 @@ return [
         'users' => [
             'provider' => 'users',
             'table' => env('AUTH_PASSWORD_RESET_TOKEN_TABLE', 'password_reset_tokens'),
-            'expire' => 60,
-            'throttle' => 60,
+            'expire' => 600,
+            'throttle' => 600,
+        ],
+        'doctors' => [
+            'provider' => 'doctors',
+            'table' => 'password_reset_tokens', // You can use the same table if you wish
+            'expire' => 600,
+            'throttle' => 600,
         ],
     ],
 

@@ -1,24 +1,50 @@
-@extends('dashboard.layouts.core')
-
-@section("page-name", trans("modules.My Profile"))
-
-@section("breadcrumb")
-    <span class="kt-subheader__breadcrumbs-separator"></span>
-    <a href="{{ route('dashboard') }}" class="kt-subheader__breadcrumbs-link">@lang('modules.Dashboard')</a>
-    <span class="kt-subheader__breadcrumbs-separator"></span>
-    <span class="kt-subheader__breadcrumbs-link kt-subheader__breadcrumbs-link--active">@lang('modules.My Profile')</span>
-@endsection
-
+@php
+    $page = __('sidebar.Users');
+    $breadcrumb = [
+        [
+            "title" => __('sidebar.Users'),
+            "url" => route('dashboard.users.index')
+        ],
+        [
+            "title" => __('sidebar.New User'),
+        ],
+    ];
+@endphp
+@extends('dashboard.mt.main')
 @section('content')
 
     <div class="row">
+        @if(session('updated'))
+            <div class="alert alert-success">
+                {{ session('updated') }}
+            </div>
+        @endif
+
+            <div id="validationErrors" class="alert alert-danger d-none"></div>
+        {{-- Section for List of Requests --}}
+{{--        @include('users::users.list_cycle_requests')--}}
+
         <div class="col-md-12 mb-4">
             <div class="nav-tabs-boxed">
-                <ul class="nav nav-tabs" role="tablist">
-                    <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#home-1" role="tab" aria-controls="home">My Profile</a></li>
-                    <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#profile-1" role="tab" aria-controls="profile">@lang('profile.Edit Profile')</a></li>
-                    <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#messages-1" role="tab" aria-controls="messages">@lang('profile.Edit Password')</a></li>
+
+                <ul class="nav nav-tabs nav-line-tabs nav-line-tabs-2x mb-5 fs-6">
+                    <li class="nav-item">
+                        <a class="nav-link active" data-bs-toggle="tab" href="#home-1">@lang('profile.My Profile')</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-bs-toggle="tab" href="#profile-1">@lang('profile.Edit Profile')</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-bs-toggle="tab" href="#messages-1">@lang('profile.Edit Password')</a>
+                    </li>
+
                 </ul>
+
+                {{--                <ul class="nav nav-tabs" role="tablist">--}}
+                {{--                    <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="" role="tab" aria-controls="home"></a></li>--}}
+                {{--                    <li class="nav-item"><a class="nav-link" data-toggle="tab" href="" role="tab" aria-controls="profile">@lang('')</a></li>--}}
+                {{--                    <li class="nav-item"><a class="nav-link" data-toggle="tab" href="" role="tab" aria-controls="messages">@lang()</a></li>--}}
+                {{--                </ul>--}}
                 <div class="tab-content">
                     <!-- Profile Overview -->
                     <div class="tab-pane active" id="home-1" role="tabpanel">
@@ -56,17 +82,44 @@
                                     </tr>
                                     </tbody>
                                 </table>
+                                @if(auth()->user()->hasRole('Doctor'))
+                                    <div class="card-body">
+                                        <h4>Profile Information</h4>
+                                        <table class="table table-bordered">
+                                            <tbody>
+                                            @foreach ($fields as $field)
+                                                <tr>
+                                                    <th>{{ ucfirst(str_replace('_', ' ', $field)) }}</th>
+                                                    <td>
+                                                        @if (in_array($field, $translatable))
+                                                            {{ $user->getTranslation($field, app()->getLocale()) }}
+                                                        @else
+                                                            @if(is_array($user->$field))
+                                                                {{ json_encode($user->$field) }}
+                                                            @else
+                                                                {{ $user->$field ?? 'N/A' }}
+                                                            @endif
+                                                        @endif
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                @endif
                             </div>
                         </div>
                     </div>
 
                     <!-- Edit Profile -->
                     <div class="tab-pane" id="profile-1" role="tabpanel">
-                        {!! html()->modelForm($user, 'POST', route('my_profile.update', $user->id))
+                        {!! html()->modelForm($user, 'POST', route('dashboard.my_profile.update', $user->hashid ?? hid($user->id)))
                             ->attribute('autocomplete', 'off')
                             ->attribute('enctype', 'multipart/form-data')
                             ->open()
                         !!}
+                        @csrf
                         <div class="card-header">
                             <strong>{{ trans("setup.Edit") }}</strong>
                             <div class="kt-portlet__head-toolbar float-right">
@@ -81,28 +134,48 @@
                         @include('users::users.fields', ['profile' => true])
 
                         <!-- Avatar Upload Field -->
+
                         <div class="form-group col-md-6 col-12">
-                            {!! html()->label('Avatar')->for('avatar') !!}
-                            @if($errors->first('avatar'))
-                                <br><small class="text-danger">{{ $errors->first('avatar') }}</small>
-                            @endif
-                            <div class="custom-file">
-                                {!! html()->file('avatar')->class('form-control custom-file-input') !!}
-                                {!! html()->label(isset($user) && !empty($user->getFirstMediaUrl('avatar')) ? $user->getFirstMediaUrl('avatar') : "Choose File")->class("custom-file-label")->style('overflow:hidden;word-break:break-all;') !!}
+                            {!! Html::label('profile image', 'Profile Image:', ['class' => 'form-label']) !!}
+                            <div class="form-group">
+                                <div class="image-input image-input-outline" data-kt-image-input="true">
+                                    <!-- Preview Image -->
+                                    <div class="image-input-wrapper w-125px h-125px" id="preview-container"
+                                         style="background-image:
+                                 url('{{ isset($user) && $user->getMedia('avatar')->first() ? $user->getMedia('avatar')->first()->getUrl() : asset('assets/images/default-profile.png') }}');
+                                  margin-bottom: 0.2rem">
+                                    </div>
+
+                                    <!-- Upload Button -->
+                                    <label class="btn btn-icon btn-active-color-primary bg-white shadow"
+                                           data-kt-image-input-action="change" style="margin-top: 0.5rem">
+                                        {{--                                <input type="file" name="avatar" id="image-upload" class="d-none" accept="image/*">--}}
+                                        {!! html()->file('avatar')->class('d-none')->id("image-upload") !!}
+                                        <span><img src="{{ asset('assets/icons/add.svg') }}" alt="Remove"
+                                                   width="20"></span>
+                                    </label>
+
+                                    <!-- Remove Button -->
+                                    <span class="btn btn-icon btn-active-color-primary bg-white shadow"
+                                          data-kt-image-input-action="remove" id="remove-image">
+                                        <img src="{{ asset('assets/icons/remove.svg') }}" alt="Remove" width="20">
+                            </span>
+                                </div>
                             </div>
                         </div>
 
                         {!! html()->form()->close() !!}
                     </div>
-
                     <!-- Edit Password -->
                     <div class="tab-pane" id="messages-1" role="tabpanel">
-                        {!! html()->form('PUT', route('users.update_password', $user->id))->attribute('autocomplete', 'off')->open() !!}
+                        {!! html()->form('PUT', route('dashboard.users.update_password', $user->hashid ?? hid($user->id)))->attribute('autocomplete', 'off')->open() !!}
+                        @csrf
+                        @method('PUT')
                         <div class="card-header">
                             <strong>{{ trans("setup.Edit Password") }}</strong>
                             <div class="kt-portlet__head-toolbar float-right">
                                 <div class="kt-portlet__head-wrapper">
-                                    <a href="{{ route('users.index') }}" class="kt-margin-r-5">
+                                    <a href="{{ route('dashboard.users.index') }}" class="kt-margin-r-5">
                                         <span class="kt-hidden-mobile btn btn-secondary btn-hover-brand">
                                             <i class="la la-arrow-left"></i> Back
                                         </span>
@@ -125,3 +198,5 @@
     </div>
 
 @endsection
+@push('js')
+@endpush

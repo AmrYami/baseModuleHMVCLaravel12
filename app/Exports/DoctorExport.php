@@ -15,7 +15,7 @@ class DoctorExport implements FromCollection, WithHeadings
      */
     public function collection()
     {
-        return User::whereHas('roles', function ($query) {
+        return User::where('approve' , 1)->whereHas('roles', function ($query) {
             $query->where('name', 'doctor');
         })->get()->map(function ($user) {
             $mediaUrls = null;

@@ -117,6 +117,7 @@ return [
     'limiters' => [
         'login' => 'login',
         'two-factor' => 'two-factor',
+        'forgot-password' => 'forgot-password',
     ],
 
     /*
@@ -146,21 +147,21 @@ return [
     'features' => [
         Features::registration(),
         Features::resetPasswords(),
-        Features::emailVerification(),
+        //Features::emailVerification(),
         Features::updateProfileInformation(),
         Features::updatePasswords(),
-        Features::twoFactorAuthentication([
-            'confirm' => true,
-            'confirmPassword' => true,
-            // 'window' => 0,
-        ]),
+//        Features::twoFactorAuthentication([
+////            'confirm' => true,
+//            'confirmPassword' => true,
+//            'window' => 0,
+//        ]),
     ],
 
     'redirects' => [
-        'login' => 'dashboard',
+        'login' => 'requests/create',
         'logout' => 'login',
         'password-confirmation' => null,
-        'register' => 'dashboard',
+        'register' => 'requests/create',
         'email-verification' => null,
         'password-reset' => null,
     ],

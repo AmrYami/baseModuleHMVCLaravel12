@@ -10,7 +10,9 @@
                 <span class="path3"></span>
             </i>
             @endisset
-            {{$title ?? __('common.Show')}}
+            <span class="mx-3">
+                {{$title ?? __('common.Show')}}
+            </span>
         </a>
     </div>
     <!--end::Menu item-->

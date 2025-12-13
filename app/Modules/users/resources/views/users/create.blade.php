@@ -3,7 +3,7 @@
     $breadcrumb = [
         [
             "title" => __('sidebar.Users'),
-            "url" => route('users.index')
+            "url" => route('dashboard.users.index')
         ],
         [
             "title" => __('sidebar.New User'),
@@ -14,15 +14,18 @@
 @section('content')
     <x-layout.mt.cards.basic :title="__('users.Create New User')">
         <x-slot:toolbar>
-            <x-layout.mt.buttons.back :url='route("users.index")'/>
+            <x-layout.mt.buttons.back :url='route("dashboard.users.index")'/>
         </x-slot:toolbar>
-        <x-layout.mt.forms.form :action="route('users.store')">
+        <x-layout.mt.forms.form :action="route('dashboard.users.store')">
             <x-slot:attributes>
                 enctype="multipart/form-data"
                 autocomplete="off"
             </x-slot:attributes>
+
             @include('users::users.role_field')
+
             @include('users::users.fields')
+
             @include('users::users.fields_password')
 
         </x-layout.mt.forms.form>
@@ -30,44 +33,29 @@
 @endsection
 @push('js')
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            let roleSelect = document.querySelector('#roleSelect');
-console.log(roleSelect)
-            // Ensure Select2 initializes properly
-            $(roleSelect).on('change', function () {
-                toggleDoctorFields(this);
-            });
+    <script nonce="{{ csp_nonce() }}">
+        const imageInput = document.getElementById('image-upload');
+        const preview = document.getElementById('preview-container');
+        const removeBtn = document.getElementById('remove-image');
 
-            function toggleDoctorFields(select) {
-                const doctorFields = document.getElementById('doctorFields');
-                if (select.value === 'doctor') {
-                    doctorFields.style.display = 'block';
-                    // Enable all disabled inputs inside the doctorFields section
-                    doctorFields.querySelectorAll('input').forEach(input => input.disabled = false);
-                } else {
-                    doctorFields.style.display = 'none';
-                    // Disable all inputs inside the doctorFields section
-                    doctorFields.querySelectorAll('input').forEach(input => input.disabled = true);
+        if (imageInput && preview) {
+            imageInput.addEventListener('change', function (event) {
+                const reader = new FileReader();
+                reader.onload = function () {
+                    preview.style.backgroundImage = `url('${reader.result}')`;
+                };
+                if (event.target.files && event.target.files[0]) {
+                    reader.readAsDataURL(event.target.files[0]);
                 }
-            }
-        });
-    </script>
+            });
+        }
 
-    <script>
-        document.getElementById('image-upload').addEventListener('change', function (event) {
-            const reader = new FileReader();
-            reader.onload = function () {
-                document.getElementById('preview-container').style.backgroundImage = `url('${reader.result}')`;
-            };
-            reader.readAsDataURL(event.target.files[0]);
-        });
-
-        // Remove Image Preview
-        document.getElementById('remove-image').addEventListener('click', function () {
-            document.getElementById('preview-container').style.backgroundImage = "url('/default-profile.jpg')";
-            document.getElementById('image-upload').value = ""; // Clear input
-        });
+        if (removeBtn && imageInput && preview) {
+            removeBtn.addEventListener('click', function () {
+                preview.style.backgroundImage = "url('/default-profile.jpg')";
+                imageInput.value = ""; // Clear input
+            });
+        }
 
     </script>
 @endpush

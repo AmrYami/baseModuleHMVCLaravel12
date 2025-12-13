@@ -17,13 +17,13 @@
                     @if($role->id != 1)
                         <div class='btn-group'>
                             @can('edit-users-role')
-                                <a href="{{ route('roles.edit', [$role->id]) }}"
+                                <a href="{{ route('dashboard.roles.edit', [$role->id]) }}"
                                    class='btn btn-default btn-xs'><i class="fa fa-edit"></i></a>
                             @endcan
                             @can('delete-users-role')
 
 
-                                    {!! html()->form('DELETE', route('roles.destroy', $role->id))
+                                    {!! html()->form('DELETE', route('dashboard.roles.destroy', $role->id))
                                         ->class('d-inline-block')
                                         ->open()
                                     !!}

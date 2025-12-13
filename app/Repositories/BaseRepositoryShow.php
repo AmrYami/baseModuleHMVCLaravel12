@@ -20,7 +20,7 @@ class BaseRepositoryShow extends BaseRepository
      * @param array $columns
      * @return LengthAwarePaginator
      */
-    public function paginate(array $search = [],int $perPage, array $columns = ['*'], $skip = null, $limit = null, $orderBy = null): LengthAwarePaginator
+    public function paginate(array $search = [], int $perPage, array $columns = ['*'], $skip = null, $limit = null, $orderBy = null): LengthAwarePaginator
     {
         $query = $this->allQuery($search, $skip, $limit, $orderBy);
         return $query->paginate($perPage, $columns);
@@ -50,7 +50,7 @@ class BaseRepositoryShow extends BaseRepository
             $query->limit($limit);
         }
         if (!empty($orderBy)) {
-                $query = $this->orderByToQuery($query, $orderBy);
+            $query = $this->orderByToQuery($query, $orderBy);
 
         }
 
@@ -61,8 +61,13 @@ class BaseRepositoryShow extends BaseRepository
     //$orderBy = [['seen', 'asc'],['seen', 'asc']];
     public function orderByToQuery($query, $orderBy)
     {
-        foreach ($orderBy as $key => $value) {
-            $query = $query->orderBy($value[0], $value[1]);
+        if (is_array($orderBy[0])) {
+
+            foreach ($orderBy as $key => $value) {
+                $query = $query->orderBy($value[0], $value[1]);
+            }
+        } else {
+            $query = $query->orderBy($orderBy[0], $orderBy[1]);
         }
         return $query;
     }
@@ -118,6 +123,12 @@ class BaseRepositoryShow extends BaseRepository
         return $builder->first($columns);
     }
 
+    public function findWithRelations($id)
+    {
+        $query = $this->model->newQuery();
+        return $query->find($id);
+    }
+
     /**
      * @param array $criteria
      * @param array|string[] $columns
@@ -130,10 +141,10 @@ class BaseRepositoryShow extends BaseRepository
             $operator = '=';
             if (is_array($value) && in_array($key, $this->getFieldsSearchable())) {
                 $builder->where($key, $value['operator'], $value['value']);
-            }else {
-                if (!is_array($value)){
+            } else {
+                if (!is_array($value)) {
                     $builder->error = "$value is Not array";
-                } elseif (!in_array($key, $this->getFieldsSearchable())){
+                } elseif (!in_array($key, $this->getFieldsSearchable())) {
                     $builder->error = "$key is Not searchable";
                 }
             }
@@ -152,6 +163,10 @@ class BaseRepositoryShow extends BaseRepository
         if ($whereHas = MoreImplementation::getWhereHas())
             $query = $this->addWhereHasToQuery($query, $whereHas);
 
+
+        if ($whereDoesntHave = MoreImplementation::getWhereDoesntHave())
+            $query = $this->addWhereDoesntHaveToQuery($query, $whereDoesntHave);
+
         if ($withQuery = MoreImplementation::getWithQuery())
             $query = $this->addWithQueryToQuery($query, $withQuery);
 
@@ -160,6 +175,7 @@ class BaseRepositoryShow extends BaseRepository
 
         return $query;
     }
+
 //        MoreImplementation::setOrWhere(['status', 1]);
     public function addOrWhereToQuery($query, $orWhere)
     {
@@ -196,15 +212,34 @@ class BaseRepositoryShow extends BaseRepository
 
 
 //MoreImplementation::setWhereHas([
-            //              'roles' => [
-            //              'where' => ['name' => "owner"]
-            //          ]
-            //      ]);
+    //              'roles' => [
+    //              'where' => ['name' => "owner"]
+    //          ]
+    //      ]);
     public function addWhereHasToQuery($query, $whereHas)
     {
         foreach ($whereHas as $val) {
             foreach ($val as $key => $value) {
                 $query = $query->whereHas($key, function ($q) use ($key, $value) {
+                    $q = self::proccessQuery($q, $value);
+                    if (isset($value['deep']) && count($value['deep']) > 0)
+                        $this->addWhereHasToQuery($q, $value['deep']);
+                });
+            }
+        }
+        return $query;
+    }
+
+//MoreImplementation::setWhereDoesntHaveToQuery([
+    //              'roles' => [
+    //              'where' => ['name' => "owner"]
+    //          ]
+    //      ]);
+    public function addWhereDoesntHaveToQuery($query, $whereHas)
+    {
+        foreach ($whereHas as $val) {
+            foreach ($val as $key => $value) {
+                $query = $query->whereDoesntHave($key, function ($q) use ($key, $value) {
                     $q = self::proccessQuery($q, $value);
                     if (isset($value['deep']) && count($value['deep']) > 0)
                         $this->addWhereHasToQuery($q, $value['deep']);
@@ -254,8 +289,8 @@ class BaseRepositoryShow extends BaseRepository
     {
         if (count($search)) {
 //            foreach ($search as $val) {
-                foreach ($search as $key => $value) {
-                    $query->where($key, $value);
+            foreach ($search as $key => $value) {
+                $query->where($key, $value);
 //                }
             }
         }

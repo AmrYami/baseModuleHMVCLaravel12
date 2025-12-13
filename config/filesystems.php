@@ -56,14 +56,17 @@ return [
             'url' => env('AWS_URL'),
             'endpoint' => env('AWS_ENDPOINT'),
             'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', false),
+            'root' => env('AWS_ROOT', 'hhc'),
             'throw' => false,
             'report' => false,
         ],
 
         'media' => [
-            'driver' => 'local',
-            'root'   => public_path().'/upload/media',
-            'url'    => env('APP_URL').'/upload/media',
+            'driver' => env('MEDIA_DRIVER', env('MEDIA_DISK', env('FILESYSTEM_DISK', 'local'))),
+            // Use AWS root when present so S3 uploads land under that prefix; otherwise default to local folder.
+            'root'   => env('MEDIA_ROOT', env('AWS_ROOT', 'upload/media')),
+            // Prefer MEDIA_URL, then AWS_URL for S3/CDN, then APP_URL fallback
+            'url'    => env('MEDIA_URL', env('AWS_URL', env('APP_URL').'/upload/media')),
             'visibility' => 'public',
             'throw' => false,
         ],

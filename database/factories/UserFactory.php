@@ -26,10 +26,17 @@ class UserFactory extends Factory
      */
     public function definition(): array
     {
+        $fullName = fake()->name();
+        $userName = fake()->unique()->userName();
         return [
-            'name' => fake()->name(),
+            'name' => json_encode(['en' => $fullName]),
+            'user_name' => $userName,
             'email' => fake()->unique()->safeEmail(),
+            'mobile' => '05' . fake()->unique()->numerify('########'),
             'email_verified_at' => now(),
+            'status' => 1,
+            'approve' => 1,
+            'code' => fake()->unique()->bothify('code_##??##'),
             'password' => static::$password ??= Hash::make('password'),
             'two_factor_secret' => null,
             'two_factor_recovery_codes' => null,

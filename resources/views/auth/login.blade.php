@@ -19,7 +19,7 @@
         <!--begin::Input group=-->
         <div class="fv-row mb-8">
             <!--begin::Email-->
-            <input type="text" placeholder="{{ __('Email') }}" name="email" class="form-control bg-transparent"  :value="old('email')" required autofocus autocomplete="username"/>
+            <input type="text" placeholder="{{ __('Email or Username') }}" name="email" class="form-control bg-transparent"  :value="old('email')" required autofocus autocomplete="username"/>
             <!--end::Email-->
         </div>
         <!--end::Input group=-->
@@ -39,12 +39,14 @@
         <!--end::Input group=-->
         @if (Route::has('password.request'))
         <!--begin::Wrapper-->
-        <div class="d-flex flex-stack flex-wrap gap-3 fs-base fw-semibold mb-8">
-            <div></div>
-            <!--begin::Link-->
-            <a href="{{ route('password.request') }}" class="link-primary"> {{ __('Forgot your password?') }}</a>
-            <!--end::Link-->
-        </div>
+{{--        <div class="d-flex flex-stack flex-wrap gap-3 fs-base fw-semibold mb-8">--}}
+{{--            <div></div>--}}
+{{--            <!--begin::Link-->--}}
+{{--            <a href="{{ route('register') }}" class="link-primary"> {{ __('Dont have account?') }}</a>--}}
+{{--            <a href="{{ route('password.request') }}" class="link-primary"> {{ __('Forgot your password?') }}</a>--}}
+{{--            <!--end::Link-->--}}
+{{--        </div>--}}
+
         <!--end::Wrapper-->
         @endif
         <!--begin::Submit button-->

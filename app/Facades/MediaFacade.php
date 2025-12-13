@@ -6,18 +6,32 @@ use Exception;
 use Eloquent as Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use phpDocumentor\Reflection\Types\Self_;
+use Illuminate\Support\Facades\Session;
+
+
+//use phpDocumentor\Reflection\Types\Self_;
 use Spatie\Image\Image;
-use Spatie\Image\Manipulations;
-use Spatie\MediaLibrary\Models\Media;
+
+//use Spatie\Image\Manipulations;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
+use Illuminate\Support\Facades\DB;
+
+//use Spatie\MediaLibrary\Models\Media;
 
 /**
- * this class apply only types video, logo, avatar, delete,document,mediafile[multi], mediafile[videos],mediafile[documents], mediafile[images].
+ * this class apply only types video, logo, avatar, delete,document,mediafile[multi], mediafile[videos],mediafile[documents], mediafile[images], mediafiles[put any name].
  * add more types if you need
  * @todo add media method for adding pluck of files
  */
 class MediaFacade
 {
+
+//    protected static function disk(): string
+//    {
+//        return env('MEDIA_DISK', 's3');
+//    }
+
+
     static $types = ["videos", "images", "logo", "image", "documents", "avatar", "gallery"]; //we don't use this variable in this model
 
     static $multiFilesType = ["videos", "images", "documents", "gallery"];
@@ -40,6 +54,9 @@ class MediaFacade
         if ($request->mediafile) {
             self::addMediaArray($request, $item);
         }
+        if ($request->mediafiles) {
+            self::addMediafiles($request, $item);
+        }
         // delete media file
         if ($request['delete']) {
             $error = self::deleteMedia($request, $item);
@@ -48,6 +65,7 @@ class MediaFacade
         if ($request->logo && $request->logo !== 'undefined') {
             $error = self::attachLogoAvatarAndOtherSame($request->logo, $item, 'logo');
         }
+
         // add avatar
         if ($request->avatar && $request->avatar !== 'undefined') {
             $error = self::attachLogoAvatarAndOtherSame($request->avatar, $item, 'avatar');
@@ -88,10 +106,11 @@ class MediaFacade
 
     /**
      * @param Request $request
-     * @param $item  //  related model
+     * @param $item //  related model
      */
     static function deleteMedia(Request $request, $item)
     {
+
         if (strpos($request['delete'], ',') !== false) {
             $dataExploded = explode(',', $request['delete']);
             $dataExploded = array_filter($dataExploded);
@@ -100,14 +119,16 @@ class MediaFacade
                 self::deleteFileWithDir($del);
             }
         } else {
+
             Media::where('id', $request['delete'])->delete();
             self::deleteFileWithDir($request['delete']);
+
         }
     }
 
     /**
      * @param Request $request
-     * @param $item  // model related
+     * @param $item // model related
      */
     static function addMediaArray(Request $request, $item)
     {
@@ -120,6 +141,24 @@ class MediaFacade
             else
                 $error += self::completeProccess($key, $files, $item, $error);
         }
+    }
+
+    static function addMediafiles(Request $request, $item)
+    {
+        $error = 0;
+        foreach ($request->mediafiles as $key => $files) {
+            if (is_array($files)) {
+
+                foreach ($files as $file) {
+                    $error += self::completeProccessUnKnownMedia($key, $file, $item, $error);
+                }
+            } else {
+//                dd(123123);
+                $error += self::completeProccessUnKnownMedia($key, $files, $item, $error);
+            }
+        }
+
+        return $error;
     }
 
     static function allTypes($key)
@@ -172,13 +211,13 @@ class MediaFacade
     /**
      * @param $key // type media
      * @param $file
-     * @param $item  // model related
+     * @param $item // model related
      * @param $error //count errors
      */
     static function completeProccess($key, $file, $item, $error)
     {
         if (!empty($file) && $file !== 'undefined') {
-            try {
+//            try {
                 if ($key == 'multi') {
                     if (self::validateFiles($key, $file, self::allSize('default'))) {//put limit for image
                         $check = self::addToMedia($file, $item, $key);//add media function
@@ -222,13 +261,32 @@ class MediaFacade
                     }
 
                 }
-            } catch (Exception $e) {
-                $error++;
-            }
+//            } catch (Exception $e) {
+//                $error++;
+//            }
         }
         if ($key == 'videos' && $file == null) {
             $item->media()->where('collection_name', $key)->delete();
         }
+    }
+
+    static function completeProccessUnKnownMedia($key, $file, $item, $error)
+    {
+        if (!empty($file) && $file !== 'undefined') {
+//            try {
+//            if (self::validateFiles($key, $file, self::allSize('default'))) {//put limit for image
+            $check = self::addToMedia($file, $item, $key);//add media function
+            if (!$check)
+                $error++;
+//            } else {
+//                $error++;
+//            }
+
+//            } catch (Exception $e) {
+//                $error++;
+//            }
+        }
+        return $error;
     }
 
     /**
@@ -241,21 +299,23 @@ class MediaFacade
     {
 
 //        try {
-            $error = 0;
-            if (self::validateFiles($collectionName, $image, self::allSize($collectionName))) {//put limit for image
-                $itemData = $item->media()->where('collection_name', $collectionName)->get();// get item data for check and delete
-                if ($itemData) {
-                    $item->media()->where('collection_name', $collectionName)->delete();// delete form database
-                    if (isset($itemData[0]) && $itemData[0])
-                        self::deleteFileWithDir($itemData[0]->id);// delete from storage
-                }
-                $check = self::addToMedia($image, $item, $collectionName);//add media function
-                if (!$check)
-                    $error++;
-            } else {
+        $error = 0;
+        if (self::validateFiles($collectionName, $image, self::allSize($collectionName))) {//put limit for image
+            $itemData = $item->media()->where('collection_name', $collectionName)->get();// get item data for check and delete
 
-                $error++;
+            if ($itemData) {
+                $item->media()->where('collection_name', $collectionName)->delete();// delete form database
+                if (isset($itemData[0]) && $itemData[0])
+                    self::deleteFileWithDir($itemData[0]->id);// delete from storage
             }
+            $check = self::addToMedia($image, $item, $collectionName);//add media function
+
+            if (!$check)
+                $error++;
+        } else {
+
+            $error++;
+        }
 //        } catch (Exception $e) {
 //            $error++;
 //        }
@@ -271,20 +331,31 @@ class MediaFacade
     static function addToMedia($file, $item, $key)
     {
 //        try {
-        if ($key == 'video') {
-            $item->media()->where('collection_name', $key)->delete();
-        }
-        $filename = md5(uniqid() . time()) . '.' . $file->getClientOriginalExtension();
-        Storage::disk('media')->put($filename, file_get_contents($file));
-        $pathToFile = Storage::disk('media')->path($filename);
+//        if ($key == 'video') {
+//            $item->media()->where('collection_name', $key)->delete();
+//        }
+            if ($key === 'video') {
+                $item->clearMediaCollection($key);
+            }
 
+//        $filename = md5(uniqid() . time()) . '.' . $file->getClientOriginalExtension();
+//        Storage::disk('media')->put($filename, file_get_contents($file));
+//        $pathToFile = Storage::disk('media')->path($filename);
 //            if (getSettingVal('water_mark') && in_array($file->getClientOriginalExtension(), self::allTypes('images'))) {
 //                self::waterMark($pathToFile);
 //            }
-        $id_item = $item->addMedia($pathToFile)->setName($file->getClientOriginalName())->toMediaCollection($key);
-
-        return true;
+//        $id_item = $item->addMedia($pathToFile)->setName($file->getClientOriginalName())->toMediaCollection($key);
+            $item
+                ->addMedia($file)
+                ->usingName(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME))
+                ->usingFileName($file->getClientOriginalName())
+                ->toMediaCollection(
+                    $key,
+                    env('MEDIA_DISK', 's3')  // make sure MEDIA_DISK=s3 in your .env
+                );
+            return true;
 //        } catch (Exception $e) {
+//            Session::push('media_errors', "Failed to upload “{$file->getClientOriginalName()}” to {$key}.");
 //
 //            return false;
 //        }
@@ -304,23 +375,37 @@ class MediaFacade
     /**
      * @param $del // id directory same in database
      */
-    static function deleteFileWithDir($del)
+    static function deleteFileWithDir($directory)
     {
-        $pathFIle = storage_path('app/public/' . $del);
-        if (is_dir($pathFIle)) {
-            exec('sudo chmod ' . '-$pathFIle-0777');
-            $files = glob($pathFIle . '/*');
-            //Loop through the file list.
-            foreach ($files as $file) {
-                //Make sure that this is a file and not a directory.
-                if (is_file($file)) {
-                    //Use the unlink function to delete the file.
-                    unlink($file);
-                }
+        $diskName = env('MEDIA_DISK', 's3');
+        $disk = Storage::disk($diskName);
+
+        try {
+            // deleteDirectory will remove all objects under that prefix
+            if ($disk->exists($directory)) {
+                $disk->deleteDirectory($directory);
             }
-            if ($del)
-                rmdir(storage_path('app/public/' . $del));
+        } catch (\Exception $e) {
+            // push a user‐facing error
+            Session::push('media_errors', "Could not remove media files for “{$directory}”.");
         }
+
+
+//        $pathFIle = storage_path('app/public/' . $del);
+//        if (is_dir($pathFIle)) {
+//            exec('sudo chmod ' . '-$pathFIle-0777');
+//            $files = glob($pathFIle . '/*');
+//            //Loop through the file list.
+//            foreach ($files as $file) {
+//                //Make sure that this is a file and not a directory.
+//                if (is_file($file)) {
+//                    //Use the unlink function to delete the file.
+//                    unlink($file);
+//                }
+//            }
+//            if ($del)
+//                rmdir(storage_path('app/public/' . $del));
+//        }
     }
 
 }

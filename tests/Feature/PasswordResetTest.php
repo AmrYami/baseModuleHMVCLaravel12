@@ -1,9 +1,24 @@
 <?php
 
-use App\Models\User;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Str;
 use Laravel\Fortify\Features;
+use Users\Models\User;
+
+function makeResetUser(): User {
+    return User::create([
+        'name' => ['en' => 'Reset Tester'],
+        'user_name' => Str::random(8),
+        'email' => fake()->unique()->safeEmail(),
+        'mobile' => '05' . fake()->unique()->numerify('########'),
+        'password' => 'Str0ng!Pass1!',
+        'status' => 1,
+        'approve' => 1,
+        'code' => uniqid('code_'),
+        'email_verified_at' => now(),
+    ]);
+}
 
 test('reset password link screen can be rendered', function () {
     $response = $this->get('/forgot-password');
@@ -16,7 +31,7 @@ test('reset password link screen can be rendered', function () {
 test('reset password link can be requested', function () {
     Notification::fake();
 
-    $user = User::factory()->create();
+    $user = makeResetUser();
 
     $response = $this->post('/forgot-password', [
         'email' => $user->email,
@@ -30,7 +45,7 @@ test('reset password link can be requested', function () {
 test('reset password screen can be rendered', function () {
     Notification::fake();
 
-    $user = User::factory()->create();
+    $user = makeResetUser();
 
     $response = $this->post('/forgot-password', [
         'email' => $user->email,
@@ -50,7 +65,7 @@ test('reset password screen can be rendered', function () {
 test('password can be reset with valid token', function () {
     Notification::fake();
 
-    $user = User::factory()->create();
+    $user = makeResetUser();
 
     $response = $this->post('/forgot-password', [
         'email' => $user->email,

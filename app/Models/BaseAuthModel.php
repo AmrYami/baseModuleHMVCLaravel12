@@ -3,8 +3,9 @@
 namespace App\Models;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use App\Support\Concerns\UsesHashids;
+use App\Support\Concerns\LogsModelActivity;
 use Spatie\Activitylog\LogOptions;
-use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Translatable\HasTranslations;
 use ReflectionClass;
 
@@ -13,8 +14,9 @@ class BaseAuthModel extends Authenticatable
     protected $connection = 'mysql';
 
 
-    use LogsActivity;
+    use LogsModelActivity;
     use HasTranslations;
+    use UsesHashids;
 
 
     protected static $logName;
@@ -51,8 +53,11 @@ class BaseAuthModel extends Authenticatable
         return $property->getValue($this);
     }
 
-    protected function asJson($value)
+    public function asJson($value, $flags = 0)
     {
-        return json_encode($value, JSON_UNESCAPED_UNICODE);
+        // Your custom implementation here
+
+        // For example, you could call the parent method if needed:
+        return parent::asJson($value, $flags);
     }
 }

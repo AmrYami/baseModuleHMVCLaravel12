@@ -104,10 +104,10 @@
     @stack('js')
 
     @auth
-        <script>
+        <script nonce="{{ csp_nonce() }}">
             var currentToken = "{{ csrf_token() }}";
         </script>
-        <script src="{{ asset('js/enable-push.js') }}" defer></script>
+{{--        <script src="{{ asset('js/enable-push.js') }}" defer></script>--}}
     @endauth
 </body>
 </html>

@@ -39,7 +39,7 @@
                     </form>
                 </li>
                 <li class="c-sidebar-nav-item">
-                    <a class="c-sidebar-nav-link" href="{{route("users.index")}}" target="_top">
+                    <a class="c-sidebar-nav-link" href="{{route("dashboard.users.index")}}" target="_top">
                         <svg class="c-sidebar-nav-icon">
                             <use xlink:href="vendors/@coreui/icons/svg/free.svg#cil-bug"></use>
                         </svg>
@@ -58,14 +58,14 @@
                 Roles</a>
             <ul class="c-sidebar-nav-dropdown-items">
                 <li class="c-sidebar-nav-item">
-                    <a class="c-sidebar-nav-link" href="{{route("roles.create")}}" target="_top">
+                    <a class="c-sidebar-nav-link" href="{{route("dashboard.roles.create")}}" target="_top">
                         <svg class="c-sidebar-nav-icon">
                             <use xlink:href="vendors/@coreui/icons/svg/free.svg#cil-account-logout"></use>
                         </svg>
                         {{__('sidebar.Create')}}</a>
                 </li>
                 <li class="c-sidebar-nav-item">
-                    <a class="c-sidebar-nav-link" href="{{route("roles.index")}}" target="_top">
+                    <a class="c-sidebar-nav-link" href="{{route("dashboard.roles.index")}}" target="_top">
                         <svg class="c-sidebar-nav-icon">
                             <use xlink:href="vendors/@coreui/icons/svg/free.svg#cil-bug"></use>
                         </svg>

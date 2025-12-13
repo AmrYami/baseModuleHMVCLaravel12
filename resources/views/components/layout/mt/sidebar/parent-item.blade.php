@@ -3,15 +3,15 @@
     <!--begin:Menu link-->
     <span class="menu-link">
         <span class="menu-icon">
-            {{ $mainIcon }}
+            {{ $mainIcon ?? '' }}
         </span>
-        <span class="menu-title">{{ $mainTitle}}</span>
+        <span class="menu-title">{{ $mainTitle ?? ''}}</span>
         <span class="menu-arrow"></span>
     </span>
     <!--end:Menu link-->
     <!--begin:Menu sub-->
     <div class="menu-sub menu-sub-accordion">
-        {{$submenu}}
+        {{$submenu ?? ''}}
     </div>
     <!--end:Menu sub-->
 </div>

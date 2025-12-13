@@ -10,6 +10,7 @@ use Users\Services\RoleServiceShow;
 use Users\Services\RoleServiceStore;
 use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Artisan;
 
 class RoleController extends BaseController
 {
@@ -67,8 +68,9 @@ class RoleController extends BaseController
     {
 
         $role = $this->roleServiceStore->save($request);
+        Artisan::call('permission:cache-reset');
         if ($role) {
-            return redirect()->route('roles.index')->with('created', __('messages.Created', ['thing' => 'User Role']));
+            return redirect()->route('dashboard.roles.index')->with('created', __('messages.Created', ['thing' => 'User Role']));
         } else {
             return back()->withErrors(__('common.Sorry But You Should Select Permission To Role'));
         }
@@ -101,6 +103,10 @@ class RoleController extends BaseController
         if ($id == 1)
             return back();
         $role = $this->serviceShow->find($id, $request);
+        $user = $request->user();
+        if (!$user->hasRole('CRM Admin') && !$role->users->contains($user)) {
+            return back()->withErrors(__('You can only edit roles you are assigned to.'));
+        }
         $rolePermissions = $role->permissions->pluck('id');
         $selected = $rolePermissions;
         return view('users::roles.edit', [
@@ -125,9 +131,16 @@ class RoleController extends BaseController
         try {
             if ($id == 1)
                 return back();
+            $roleModel = $this->serviceShow->find($id, $request);
+            $user = $request->user();
+            if (!$user->hasRole('CRM Admin') && !$roleModel->users->contains($user)) {
+                return back()->withErrors(__('You can only edit roles you are assigned to.'));
+            }
+
             $role = $this->roleServiceStore->update($id, $request);
+            Artisan::call('permission:cache-reset');
             if ($role) {
-                return redirect()->route('roles.index')->with('updated', __('messages.Updated', ['thing' => 'User Role']));
+                return redirect()->route('dashboard.roles.index')->with('updated', __('messages.Updated', ['thing' => 'User Role']));
             } else {
                 return back()->withErrors(__('common.Sorry But there Was an issue in saving Data please try again'));
             }
@@ -150,9 +163,9 @@ class RoleController extends BaseController
     {
         $delete = $this->roleServiceStore->delete($request, $id);
         if ($delete) {
-            return redirect()->route('roles.index')->with('deleted', __('messages.Deleted', ['thing' => 'User Role']));
+            return redirect()->route('dashboard.roles.index')->with('deleted', __('messages.Deleted', ['thing' => 'User Role']));
         } else {
-            return redirect()->route('roles.index')->with('deleted', __('messages.You can\'t delete role that has users!!'));
+            return redirect()->route('dashboard.roles.index')->with('deleted', __('messages.You can\'t delete role that has users!!'));
         }
     }
 }

@@ -5,9 +5,11 @@ namespace Users\Repositories;
 use App\Interfaces\BaseRepositoryInterface;
 use App\Interfaces\RepositoryStore;
 use App\Repositories\BaseRepositoryStore;
+use Users\Models\Doctor;
 use Users\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Spatie\Permission\Models\Role;
 
 /**
  * Class Repository
@@ -46,7 +48,20 @@ class UserRepositoryStore extends BaseRepositoryStore implements RepositoryStore
 
     public function assignRole($user, $role)
     {
-        $user->assignRole($role);
+        $roleValue = $this->resolveRole($role);
+        if ($roleValue) {
+            $guard = property_exists($user, 'guard_name') && $user->guard_name
+                ? $user->guard_name
+                : config('auth.defaults.guard', 'web');
+
+            // Ensure the role exists for the expected guard to avoid runtime errors during registration
+            Role::firstOrCreate([
+                'name' => $roleValue,
+                'guard_name' => $guard,
+            ]);
+
+            $user->assignRole($roleValue);
+        }
     }
 
     /**
@@ -76,7 +91,28 @@ class UserRepositoryStore extends BaseRepositoryStore implements RepositoryStore
 
     public function syncRole($user, $role)
     {
-        $user->syncRoles($role);
+        $roleValue = $this->resolveRole($role);
+        if ($roleValue) {
+            $user->syncRoles($roleValue);
+        }
+    }
+
+    protected function resolveRole($role)
+    {
+        if (!$role) {
+            return null;
+        }
+
+        if (is_numeric($role)) {
+            $roleModel = Role::find($role);
+            return $roleModel?->name;
+        }
+
+        if ($role instanceof \Spatie\Permission\Models\Role) {
+            return $role->name;
+        }
+
+        return $role;
     }
 
     public function restore(Request $request, $id = null)
@@ -119,7 +155,7 @@ class UserRepositoryStore extends BaseRepositoryStore implements RepositoryStore
      **/
     public function model() : string
     {
-        return User::class;
+            return User::class;
     }
 
 }

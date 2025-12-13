@@ -2,8 +2,8 @@
 <html lang="en">
 	<!--begin::Head-->
 	<head>
-<base href="../../../" />
-		<title></title>
+        <base href="../../../" />
+		<title>HCM FAKEEH</title>
 		<meta charset="utf-8" />
 		<meta name="description" content="The most advanced Tailwind CSS & Bootstrap 5 Admin Theme with 40 unique prebuilt layouts on Themeforest trusted by 100,000 beginners and professionals. Multi-demo, Dark Mode, RTL support and complete React, Angular, Vue, Asp.Net Core, Rails, Spring, Blazor, Django, Express.js, Node.js, Flask, Symfony & Laravel versions. Grab your copy now and get life-time updates for free." />
 		<meta name="keywords" content="tailwind, tailwindcss, metronic, bootstrap, bootstrap 5, angular, VueJs, React, Asp.Net Core, Rails, Spring, Blazor, Django, Express.js, Node.js, Flask, Symfony & Laravel starter kits, admin themes, web design, figma, web development, free templates, free admin themes, bootstrap theme, bootstrap template, bootstrap dashboard, bootstrap dak mode, bootstrap button, bootstrap datepicker, bootstrap timepicker, fullcalendar, datatables, flaticon" />
@@ -38,7 +38,7 @@
 					<!--begin::Aside-->
 					<div class="d-flex flex-center flex-lg-start flex-column">
 						<!--begin::Logo-->
-						<a href="index.html" class="mb-7">
+						<a href="/" class="mb-7">
 							<img alt="Logo" src="{{ asset("mt/assets/media/logos/fakeeh_log.png") }}" class="h-200px theme-light-show" />
 						</a>
 						<!--end::Logo-->

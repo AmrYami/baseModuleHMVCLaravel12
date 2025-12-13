@@ -2,14 +2,15 @@
 <html lang="en">
 	<!--begin::Head-->
 	<head>
-		<title>{{ $page }}</title>
+        @php($pageTitle = $page ?? config('app.name', 'Dashboard'))
+		<title>{{ $pageTitle }}</title>
         @include('dashboard.mt.layout.head')
 	</head>
 	<!--end::Head-->
 	<!--begin::Body-->
 	<body id="kt_app_body" data-kt-app-layout="light-sidebar" data-kt-app-header-fixed="true" data-kt-app-sidebar-enabled="true" data-kt-app-sidebar-fixed="true" data-kt-app-sidebar-hoverable="true" data-kt-app-sidebar-push-header="true" data-kt-app-sidebar-push-toolbar="true" data-kt-app-sidebar-push-footer="true" data-kt-app-toolbar-enabled="true" class="app-default">
 		<!--begin::Theme mode setup on page load-->
-		<script>var defaultThemeMode = "light"; var themeMode; if ( document.documentElement ) { if ( document.documentElement.hasAttribute("data-bs-theme-mode")) { themeMode = document.documentElement.getAttribute("data-bs-theme-mode"); } else { if ( localStorage.getItem("data-bs-theme") !== null ) { themeMode = localStorage.getItem("data-bs-theme"); } else { themeMode = defaultThemeMode; } } if (themeMode === "system") { themeMode = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"; } document.documentElement.setAttribute("data-bs-theme", themeMode); }</script>
+		<script nonce="{{ csp_nonce() }}">var defaultThemeMode = "light"; var themeMode; if ( document.documentElement ) { if ( document.documentElement.hasAttribute("data-bs-theme-mode")) { themeMode = document.documentElement.getAttribute("data-bs-theme-mode"); } else { if ( localStorage.getItem("data-bs-theme") !== null ) { themeMode = localStorage.getItem("data-bs-theme"); } else { themeMode = defaultThemeMode; } } if (themeMode === "system") { themeMode = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"; } document.documentElement.setAttribute("data-bs-theme", themeMode); }</script>
 		<!--end::Theme mode setup on page load-->
 		<!--begin::App-->
 		<div class="d-flex flex-column flex-root app-root" id="kt_app_root">
@@ -22,7 +23,7 @@
                     @include("dashboard.mt.layout.sidebar")
 					<!--end::Sidebar-->
 					<!--begin::Main-->
-					<div class="app-main flex-column flex-row-fluid" id="kt_app_main">
+					<div class="app-main flex-column flex-row-fluid app-main-bg" id="kt_app_main">
 						<!--begin::Content wrapper-->
 						<div class="d-flex flex-column flex-column-fluid">
 							<!--begin::Toolbar-->
@@ -101,7 +102,7 @@
 											<!--end::Info-->
 											<!--begin::User-->
 											<div class="symbol symbol-circle symbol-25px" data-bs-toggle="tooltip" data-bs-boundary="window" data-bs-placement="top" title="Nina Nilson">
-												<img src="assets/media/avatars/300-14.jpg" alt="img" />
+{{--												<img src="assets/media/avatars/300-14.jpg" alt="img" />--}}
 											</div>
 											<!--end::User-->
 										</div>
@@ -124,12 +125,12 @@
 											<div class="symbol-group symbol-hover flex-nowrap flex-grow-1 min-w-100px pe-2">
 												<!--begin::User-->
 												<div class="symbol symbol-circle symbol-25px">
-													<img src="assets/media/avatars/300-2.jpg" alt="img" />
+{{--													<img src="assets/media/avatars/300-2.jpg" alt="img" />--}}
 												</div>
 												<!--end::User-->
 												<!--begin::User-->
 												<div class="symbol symbol-circle symbol-25px">
-													<img src="assets/media/avatars/300-14.jpg" alt="img" />
+{{--													<img src="assets/media/avatars/300-14.jpg" alt="img" />--}}
 												</div>
 												<!--end::User-->
 												<!--begin::User-->
@@ -163,7 +164,7 @@
 											<div class="symbol-group symbol-hover flex-nowrap flex-grow-1 min-w-100px">
 												<!--begin::User-->
 												<div class="symbol symbol-circle symbol-25px">
-													<img src="assets/media/avatars/300-20.jpg" alt="img" />
+{{--													<img src="assets/media/avatars/300-20.jpg" alt="img" />--}}
 												</div>
 												<!--end::User-->
 												<!--begin::User-->
@@ -216,7 +217,7 @@
 											<!--end::Info-->
 											<!--begin::User-->
 											<div class="symbol symbol-circle symbol-25px" data-bs-toggle="tooltip" data-bs-boundary="window" data-bs-placement="top" title="Alan Nilson">
-												<img src="assets/media/avatars/300-1.jpg" alt="img" />
+{{--												<img src="assets/media/avatars/300-1.jpg" alt="img" />--}}
 											</div>
 											<!--end::User-->
 										</div>
@@ -257,7 +258,7 @@
 											<!--end::Info-->
 											<!--begin::User-->
 											<div class="symbol symbol-circle symbol-25px" data-bs-toggle="tooltip" data-bs-boundary="window" data-bs-placement="top" title="Jan Hummer">
-												<img src="assets/media/avatars/300-23.jpg" alt="img" />
+{{--												<img src="assets/media/avatars/300-23.jpg" alt="img" />--}}
 											</div>
 											<!--end::User-->
 										</div>
@@ -270,7 +271,7 @@
 											<!--begin::Item-->
 											<div class="d-flex flex-aligns-center pe-10 pe-lg-20">
 												<!--begin::Icon-->
-												<img alt="" class="w-30px me-3" src="assets/media/svg/files/pdf.svg" />
+                                                <img alt="" class="w-30px me-3" src="{{ asset('mt/assets/media/svg/files/pdf.svg') }}" />
 												<!--end::Icon-->
 												<!--begin::Info-->
 												<div class="ms-1 fw-semibold">
@@ -287,7 +288,7 @@
 											<!--begin::Item-->
 											<div class="d-flex flex-aligns-center pe-10 pe-lg-20">
 												<!--begin::Icon-->
-												<img alt="apps/projects/project.html" class="w-30px me-3" src="assets/media/svg/files/doc.svg" />
+                                                <img alt="apps/projects/project.html" class="w-30px me-3" src="{{ asset('mt/assets/media/svg/files/doc.svg') }}" />
 												<!--end::Icon-->
 												<!--begin::Info-->
 												<div class="ms-1 fw-semibold">
@@ -304,7 +305,7 @@
 											<!--begin::Item-->
 											<div class="d-flex flex-aligns-center">
 												<!--begin::Icon-->
-												<img alt="apps/projects/project.html" class="w-30px me-3" src="assets/media/svg/files/css.svg" />
+                                                <img alt="apps/projects/project.html" class="w-30px me-3" src="{{ asset('mt/assets/media/svg/files/css.svg') }}" />
 												<!--end::Icon-->
 												<!--begin::Info-->
 												<div class="ms-1 fw-semibold">
@@ -354,7 +355,7 @@
 											<!--end::Info-->
 											<!--begin::User-->
 											<div class="symbol symbol-circle symbol-25px" data-bs-toggle="tooltip" data-bs-boundary="window" data-bs-placement="top" title="Nina Nilson">
-												<img src="assets/media/avatars/300-14.jpg" alt="img" />
+{{--												<img src="assets/media/avatars/300-14.jpg" alt="img" />--}}
 											</div>
 											<!--end::User-->
 										</div>
@@ -392,7 +393,7 @@
 											<!--end::Info-->
 											<!--begin::User-->
 											<div class="symbol symbol-circle symbol-25px" data-bs-toggle="tooltip" data-bs-boundary="window" data-bs-placement="top" title="Marcus Dotson">
-												<img src="assets/media/avatars/300-2.jpg" alt="img" />
+{{--												<img src="assets/media/avatars/300-2.jpg" alt="img" />--}}
 											</div>
 											<!--end::User-->
 										</div>
@@ -406,7 +407,7 @@
 											<div class="overlay me-10">
 												<!--begin::Image-->
 												<div class="overlay-wrapper">
-													<img alt="img" class="rounded w-150px" src="assets/media/stock/600x400/img-29.jpg" />
+                                                    <img alt="img" class="rounded w-150px" src="{{ asset('mt/assets/media/stock/600x400/img-29.jpg') }}" />
 												</div>
 												<!--end::Image-->
 												<!--begin::Link-->
@@ -420,7 +421,7 @@
 											<div class="overlay me-10">
 												<!--begin::Image-->
 												<div class="overlay-wrapper">
-													<img alt="img" class="rounded w-150px" src="assets/media/stock/600x400/img-31.jpg" />
+                                                    <img alt="img" class="rounded w-150px" src="{{ asset('mt/assets/media/stock/600x400/img-31.jpg') }}" />
 												</div>
 												<!--end::Image-->
 												<!--begin::Link-->
@@ -434,7 +435,7 @@
 											<div class="overlay">
 												<!--begin::Image-->
 												<div class="overlay-wrapper">
-													<img alt="img" class="rounded w-150px" src="assets/media/stock/600x400/img-40.jpg" />
+                                                    <img alt="img" class="rounded w-150px" src="{{ asset('mt/assets/media/stock/600x400/img-40.jpg') }}" />
 												</div>
 												<!--end::Image-->
 												<!--begin::Link-->
@@ -519,7 +520,7 @@
 											<!--end::Info-->
 											<!--begin::User-->
 											<div class="symbol symbol-circle symbol-25px" data-bs-toggle="tooltip" data-bs-boundary="window" data-bs-placement="top" title="Robert Rich">
-												<img src="assets/media/avatars/300-4.jpg" alt="img" />
+{{--												<img src="assets/media/avatars/300-4.jpg" alt="img" />--}}
 											</div>
 											<!--end::User-->
 										</div>
@@ -732,7 +733,7 @@
 								<div class="d-flex align-items-center mb-2">
 									<!--begin::Avatar-->
 									<div class="symbol symbol-35px symbol-circle">
-										<img alt="Pic" src="assets/media/avatars/300-25.jpg" />
+{{--										<img alt="Pic" src="{{asset('assets/media/avatars/300-25.jpg')}}" />--}}
 									</div>
 									<!--end::Avatar-->
 									<!--begin::Details-->
@@ -764,7 +765,7 @@
 									<!--end::Details-->
 									<!--begin::Avatar-->
 									<div class="symbol symbol-35px symbol-circle">
-										<img alt="Pic" src="assets/media/avatars/300-1.jpg" />
+{{--										<img alt="Pic" src="assets/media/avatars/300-1.jpg" />--}}
 									</div>
 									<!--end::Avatar-->
 								</div>
@@ -784,7 +785,7 @@
 								<div class="d-flex align-items-center mb-2">
 									<!--begin::Avatar-->
 									<div class="symbol symbol-35px symbol-circle">
-										<img alt="Pic" src="assets/media/avatars/300-25.jpg" />
+{{--										<img alt="Pic" src="assets/media/avatars/300-25.jpg" />--}}
 									</div>
 									<!--end::Avatar-->
 									<!--begin::Details-->
@@ -816,7 +817,7 @@
 									<!--end::Details-->
 									<!--begin::Avatar-->
 									<div class="symbol symbol-35px symbol-circle">
-										<img alt="Pic" src="assets/media/avatars/300-1.jpg" />
+{{--										<img alt="Pic" src="assets/media/avatars/300-1.jpg" />--}}
 									</div>
 									<!--end::Avatar-->
 								</div>
@@ -836,7 +837,7 @@
 								<div class="d-flex align-items-center mb-2">
 									<!--begin::Avatar-->
 									<div class="symbol symbol-35px symbol-circle">
-										<img alt="Pic" src="assets/media/avatars/300-25.jpg" />
+{{--										<img alt="Pic" src="assets/media/avatars/300-25.jpg" />--}}
 									</div>
 									<!--end::Avatar-->
 									<!--begin::Details-->
@@ -869,7 +870,7 @@
 									<!--end::Details-->
 									<!--begin::Avatar-->
 									<div class="symbol symbol-35px symbol-circle">
-										<img alt="Pic" src="assets/media/avatars/300-1.jpg" />
+{{--										<img alt="Pic" src="assets/media/avatars/300-1.jpg" />--}}
 									</div>
 									<!--end::Avatar-->
 								</div>
@@ -889,7 +890,7 @@
 								<div class="d-flex align-items-center mb-2">
 									<!--begin::Avatar-->
 									<div class="symbol symbol-35px symbol-circle">
-										<img alt="Pic" src="assets/media/avatars/300-25.jpg" />
+{{--										<img alt="Pic" src="assets/media/avatars/300-25.jpg" />--}}
 									</div>
 									<!--end::Avatar-->
 									<!--begin::Details-->
@@ -921,7 +922,7 @@
 									<!--end::Details-->
 									<!--begin::Avatar-->
 									<div class="symbol symbol-35px symbol-circle">
-										<img alt="Pic" src="assets/media/avatars/300-1.jpg" />
+{{--										<img alt="Pic" src="assets/media/avatars/300-1.jpg" />--}}
 									</div>
 									<!--end::Avatar-->
 								</div>
@@ -941,7 +942,7 @@
 								<div class="d-flex align-items-center mb-2">
 									<!--begin::Avatar-->
 									<div class="symbol symbol-35px symbol-circle">
-										<img alt="Pic" src="assets/media/avatars/300-25.jpg" />
+{{--										<img alt="Pic" src="assets/media/avatars/300-25.jpg" />--}}
 									</div>
 									<!--end::Avatar-->
 									<!--begin::Details-->
@@ -1046,7 +1047,7 @@
 						<!--end::Wrapper-->
 						<!--begin::Pic-->
 						<div class="symbol symbol-70px symbol-2by3 flex-shrink-0">
-							<img src="assets/media/stock/600x400/img-1.jpg" alt="" />
+                            <img src="{{ asset('mt/assets/media/stock/600x400/img-1.jpg') }}" alt="" />
 						</div>
 						<!--end::Pic-->
 					</div>
@@ -1081,7 +1082,7 @@
 						<!--end::Wrapper-->
 						<!--begin::Pic-->
 						<div class="symbol symbol-70px symbol-2by3 flex-shrink-0">
-							<img src="assets/media/stock/600x400/img-3.jpg" alt="" />
+                            <img src="{{ asset('mt/assets/media/stock/600x400/img-3.jpg') }}" alt="" />
 						</div>
 						<!--end::Pic-->
 					</div>
@@ -1116,7 +1117,7 @@
 						<!--end::Wrapper-->
 						<!--begin::Pic-->
 						<div class="symbol symbol-70px symbol-2by3 flex-shrink-0">
-							<img src="assets/media/stock/600x400/img-8.jpg" alt="" />
+                            <img src="{{ asset('mt/assets/media/stock/600x400/img-8.jpg') }}" alt="" />
 						</div>
 						<!--end::Pic-->
 					</div>
@@ -1151,7 +1152,7 @@
 						<!--end::Wrapper-->
 						<!--begin::Pic-->
 						<div class="symbol symbol-70px symbol-2by3 flex-shrink-0">
-							<img src="assets/media/stock/600x400/img-26.jpg" alt="" />
+                            <img src="{{ asset('mt/assets/media/stock/600x400/img-26.jpg') }}" alt="" />
 						</div>
 						<!--end::Pic-->
 					</div>
@@ -1186,7 +1187,7 @@
 						<!--end::Wrapper-->
 						<!--begin::Pic-->
 						<div class="symbol symbol-70px symbol-2by3 flex-shrink-0">
-							<img src="assets/media/stock/600x400/img-21.jpg" alt="" />
+                            <img src="{{ asset('mt/assets/media/stock/600x400/img-21.jpg') }}" alt="" />
 						</div>
 						<!--end::Pic-->
 					</div>
@@ -1221,7 +1222,7 @@
 						<!--end::Wrapper-->
 						<!--begin::Pic-->
 						<div class="symbol symbol-70px symbol-2by3 flex-shrink-0">
-							<img src="assets/media/stock/600x400/img-34.jpg" alt="" />
+                            <img src="{{ asset('mt/assets/media/stock/600x400/img-34.jpg') }}" alt="" />
 						</div>
 						<!--end::Pic-->
 					</div>
@@ -1256,7 +1257,7 @@
 						<!--end::Wrapper-->
 						<!--begin::Pic-->
 						<div class="symbol symbol-70px symbol-2by3 flex-shrink-0">
-							<img src="assets/media/stock/600x400/img-27.jpg" alt="" />
+                            <img src="{{ asset('mt/assets/media/stock/600x400/img-27.jpg') }}" alt="" />
 						</div>
 						<!--end::Pic-->
 					</div>
@@ -1300,7 +1301,11 @@
         <!--begin::Modals-->
         @stack('modals')
         <!--end::Modals-->
+        <!--begin::stack scripts-->
+		@stack('scripts')
+        <!--end::stack scripts-->
 		@include("dashboard.mt.layout.foot")
+
 	</body>
 	<!--end::Body-->
 </html>

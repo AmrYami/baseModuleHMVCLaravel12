@@ -7,8 +7,9 @@
 </form>
 
 <a href="javascript:void(0)"
-    class="btn btn-icon btn-primary me-2 mb-2 btn-sm rounded"
-    onclick="document.querySelector('#{{ $id }}-form').submit()"
+    class="btn btn-primary me-2 mb-2 btn-sm rounded"
+    onclick="$('#{{ $id }}-form').submit()"
     data-bs-toggle="tooltip" data-bs-placement="top" title="{{ $title }}">
     {{ $icon }}
+    {{ $title }}
 </a>

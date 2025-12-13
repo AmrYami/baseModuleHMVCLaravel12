@@ -38,8 +38,10 @@ class BaseRepositoryStore extends BaseRepository
     {
         $query = $this->model->newQuery();
 
-        if ($id)
+        if ($id){
             $model = $query->findOrFail($id);
+
+        }
 
         if ($search && count($search)) {
             $query = $this->search($query, $search);
@@ -101,5 +103,24 @@ class BaseRepositoryStore extends BaseRepository
             $model = $query->firstOrFail();
         }
         return $model->delete();
+    }
+
+    /**
+     * Update model record for given id
+     *
+     * @param array $input
+     * @param null $id
+     * @param array $search
+     * @return Builder|Builder[]|Collection|Model
+     */
+    public function updateOrCreate($id = [], array $input, array $search = [])
+    {
+        $query = $this->model->newQuery();
+        if ($search && count($search)) {
+            $query = $this->search($query, $search);
+        }
+        $model = $query->updateOrCreate($id, $input);
+
+        return $model;
     }
 }

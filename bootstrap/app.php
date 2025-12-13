@@ -16,18 +16,25 @@ return Application::configure(basePath: dirname(__DIR__))
     ])
     ->withMiddleware(function (Middleware $middleware) {
 
+        $middleware->trustProxies(at: '*');
         // global middlewares
         $middleware->append(\App\Http\Middleware\CheckBanned::class);
+        $middleware->append(\Spatie\Csp\AddCspHeaders::class);
+
+        $examGateMiddleware = class_exists(\Fakeeh\Assessments\Http\Middleware\ExamGate::class)
+            ? \Fakeeh\Assessments\Http\Middleware\ExamGate::class
+            : \App\Http\Middleware\BypassExamGate::class;
 
         $middleware->alias([
             // roles and permissions
             'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
             'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
             'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
-
+//            'force.2fa', \App\Http\Middleware\ForceTwoFactorMiddleware::class,
             //jwt auth
             'jwt.auth' => \Tymon\JWTAuth\Http\Middleware\Authenticate::class,
             'jwt.refresh' => \Tymon\JWTAuth\Http\Middleware\RefreshToken::class,
+            'exam.gate' => $examGateMiddleware,
         ]);
     })
 

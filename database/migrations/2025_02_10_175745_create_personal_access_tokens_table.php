@@ -13,7 +13,10 @@ return new class extends Migration
     {
         Schema::create('personal_access_tokens', function (Blueprint $table) {
             $table->id();
-            $table->morphs('tokenable');
+            // Use explicit columns with a short index name to avoid MySQL 64-char index limits when DB prefixes are long.
+            $table->string('tokenable_type');
+            $table->unsignedBigInteger('tokenable_id');
+            $table->index(['tokenable_type', 'tokenable_id'], 'pat_tokenable_idx');
             $table->string('name');
             $table->string('token', 64)->unique();
             $table->text('abilities')->nullable();

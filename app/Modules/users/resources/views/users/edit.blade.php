@@ -1,113 +1,75 @@
-@extends('dashboard.layouts.core')
-@section("page-name", trans("setup.Users"))
-@section("breadcrumb")
-    <div class="d-flex align-items-center flex-wrap mr-1">
-        <!--begin::Page Heading-->
-        <div class="d-flex align-items-baseline flex-wrap mr-5">
-            <!--begin::Page Title-->
-            <h5 class="text-dark font-weight-bold my-1 mr-5">@lang('users.Users')</h5>
-            <!--end::Page Title-->
-            <!--begin::Breadcrumb-->
-            <ul class="breadcrumb breadcrumb-transparent breadcrumb-dot font-weight-bold p-0 my-2 font-size-sm">
-                <li class="breadcrumb-item text-muted">
-                    <a href="{{route("dashboard")}}" class="text-muted">@lang('modules.Dashboard')</a>
-                </li>
-                <li class="breadcrumb-item text-muted">
-                    <a class="text-muted">@lang('users.Users')</a>
-                </li>
-                <li class="breadcrumb-item text-muted">
-                    <a href="" class="text-muted">@lang('users.Edit')</a>
-                </li>
-            </ul>
-            <!--end::Breadcrumb-->
-        </div>
-        <!--end::Page Heading-->
-    </div>
-@endsection
+@php
+    $page = __('sidebar.Users');
+    $breadcrumb = [
+        [
+            "title" => __('sidebar.Users'),
+            "url" => route('dashboard.users.create')
+        ],
+        [
+            "title" => __('sidebar.New User'),
+        ],
+    ];
+@endphp
+@extends('dashboard.mt.main')
 @section('content')
-    <div class="row">
-        <div class="col-md-12">
-            <div class="card">
-                {!! html()->modelForm($user, 'PUT', route('users.update', $user->id))
-                    ->attribute('autocomplete', 'off')
-                    ->attribute('enctype', 'multipart/form-data')
-                    ->open()
-                !!}
-                <div class="card-header"><strong>{{trans("setup.Edit")}}</strong>
-                    <div class="kt-portlet__head-toolbar float-right">
-                        <div class="kt-portlet__head-wrapper">
-                            <a href="{{route('users.index')}}" class="kt-margin-r-5">
-                                <span class=" kt-hidden-mobile btn btn-secondary btn-hover-brand"><i
-                                        class="la la-arrow-left"></i>Back</span>
-                            </a>
-                            <div class="btn-group">
-                                {!! html()->button()->type('submit')->class('btn btn-info')->html('<i class="fa fa-save"></i> Save') !!}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card-body">
-                    @include('users::users.role_field')
-                    @include('users::users.fields')
-                </div>
-
-                {!! html()->closeModelForm() !!}
+    <x-layout.mt.cards.basic :title="__('users.Create New User')">
+        <x-slot:toolbar>
+            <x-layout.mt.buttons.back :url='route("dashboard.users.index")'/>
+        </x-slot:toolbar>
+        @if(session('updated'))
+            <div class="alert alert-success">
+                {{ session('updated') }}
             </div>
-        </div>
-        <!-- /.col-->
-    </div>
+        @endif
+        <x-layout.mt.forms.form :data="$user" :action="route('dashboard.users.update', $user->hashid ?? hid($user->id))" :method="'PUT'" :submitButton="'submit-user'">
+            <x-slot:attributes>
+                enctype="multipart/form-data"
+                autocomplete="off"
+            </x-slot:attributes>
+            @include('users::users.role_field', [
+                'selected' => $user->roles->first()?->id
+            ])
+            @include('users::users.fields')
+
+        </x-layout.mt.forms.form>
+    </x-layout.mt.cards.basic>
 
 
-    <div class="row">
-        <div class="col-md-12">
-            <div class="card">
-                {!! html()->modelForm($user, 'PUT', route('users.update_password', $user->id))
-                     ->attribute('autocomplete', 'off')
-                     ->attribute('enctype', 'multipart/form-data')
-                     ->open()
-                 !!}
-                <div class="card-header"><strong>{{trans("setup.Edit Password")}}</strong>
-                    <div class="kt-portlet__head-toolbar float-right">
-                        <div class="kt-portlet__head-wrapper">
-{{--                            <a href="{{route('users.index')}}" class="kt-margin-r-5">--}}
-{{--                                <span class=" kt-hidden-mobile btn btn-secondary btn-hover-brand"><i--}}
-{{--                                        class="la la-arrow-left"></i>Back</span>--}}
-{{--                            </a>--}}
-                            <div class="btn-group">
-                                {!! html()->button()->type('submit')->class('btn btn-info')->html('<i class="fa fa-save"></i> Save') !!}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="card-body">
-                    @include('users::users.fields_password')
+    <x-layout.mt.forms.form :data="$user" :action="route('dashboard.users.update_password', $user->hashid ?? hid($user->id))" :method="'PUT'" :submitButton="'submit-password'">
+        <x-slot:attributes>
+            enctype="multipart/form-data"
+            autocomplete="off"
+        </x-slot:attributes>
+        @include('users::users.fields_password')
 
-                    {!! html()->closeModelForm() !!}
-                </div>
-            </div>
-        </div>
-        <!-- /.col-->
-    </div>
-    <!-- /.row-->
-
+    </x-layout.mt.forms.form>
 @endsection
 
 @push('js')
 
-    <script>
-        function toggleDoctorFields(select) {
-            const doctorFields = document.getElementById('doctorFields');
-            if (select.value === 'doctor') {
-                doctorFields.style.display = 'block';
-                // Enable all disabled inputs inside the doctorFields section
-                doctorFields.querySelectorAll('input').forEach(input => input.disabled = false);
-            } else {
-                doctorFields.style.display = 'none';
-                // Disable all inputs inside the doctorFields section
-                doctorFields.querySelectorAll('input').forEach(input => input.disabled = true);
-            }
-        }
-    </script>
+    <script nonce="{{ csp_nonce() }}">
+        const imageInput = document.getElementById('image-upload');
+        const preview = document.getElementById('preview-container');
+        const removeBtn = document.getElementById('remove-image');
 
+        if (imageInput && preview) {
+            imageInput.addEventListener('change', function (event) {
+                const reader = new FileReader();
+                reader.onload = function () {
+                    preview.style.backgroundImage = `url('${reader.result}')`;
+                };
+                if (event.target.files && event.target.files[0]) {
+                    reader.readAsDataURL(event.target.files[0]);
+                }
+            });
+        }
+
+        if (removeBtn && imageInput && preview) {
+            removeBtn.addEventListener('click', function () {
+                preview.style.backgroundImage = "url('/default-profile.jpg')";
+                imageInput.value = ""; // Clear input
+            });
+        }
+
+    </script>
 @endpush

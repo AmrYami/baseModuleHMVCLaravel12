@@ -45,15 +45,15 @@ return [
         'mysql' => [
             'driver' => 'mysql',
             'url' => env('DB_URL'),
-            'host' => env('DB_HOST', 'apidb.cs3tai2cfqr7.me-south-1.rds.amazonaws.com'),
+            'host' => env('DB_HOST', ''),
             'port' => env('DB_PORT', '3306'),
-            'database' => env('DB_DATABASE', 'elearning_dev'),
-            'username' => env('DB_USERNAME', 'elearningadmin'),
-            'password' => env('DB_PASSWORD', '84KU9JTknswHQeK3'),
+            'database' => env('DB_DATABASE', ''),
+            'username' => env('DB_USERNAME', ''),
+            'password' => env('DB_PASSWORD', ''),
             'unix_socket' => env('DB_SOCKET', ''),
             'charset' => env('DB_CHARSET', 'utf8mb4'),
             'collation' => env('DB_COLLATION', 'utf8mb4_unicode_ci'),
-            'prefix' => '',
+            'prefix' => env('DB_PREFIX', 'hcm_'),
             'prefix_indexes' => true,
             'strict' => true,
             'engine' => null,
@@ -145,10 +145,10 @@ return [
 
         'client' => env('REDIS_CLIENT', 'phpredis'),
 
-        'options' => [
-            'cluster' => env('REDIS_CLUSTER', 'redis'),
-            'prefix' => env('REDIS_PREFIX', Str::slug(env('APP_NAME', 'laravel'), '_').'_database_'),
-        ],
+//        'options' => [
+//            'cluster' => env('REDIS_CLUSTER', 'redis'),
+//            'prefix' => env('REDIS_PREFIX', Str::slug(env('APP_NAME', 'laravel'), '_').'_database_'),
+//        ],
 
         'default' => [
             'url' => env('REDIS_URL'),

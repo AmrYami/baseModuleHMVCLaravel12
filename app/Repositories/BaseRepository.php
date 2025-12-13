@@ -31,6 +31,7 @@ abstract class BaseRepository
         $this->app = $app;
         $this->makeModel();
     }
+    
     /**
      * Make Model instance
      *
@@ -48,7 +49,9 @@ abstract class BaseRepository
 
         return $this->model = $model;
     }
-//for search make request has value => array(operator, $value)
+
+    //for search make request has value => array(operator, $value)
+
     public function search($query, $search)
     {
         if (count($search)) {
@@ -63,5 +66,4 @@ abstract class BaseRepository
         }
         return $query;
     }
-
 }

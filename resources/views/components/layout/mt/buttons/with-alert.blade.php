@@ -7,8 +7,8 @@
 </form>
 
 <a href="javascript:void(0)"
-    class="btn btn-icon btn-primary me-2 mb-2 btn-sm rounded"
-    onclick="salert(this, '{{ $id }}')"
+    class="btn btn-primary me-2 mb-2 btn-sm rounded {{ $classes ??'' }}"
+    onclick="salert(this, '{{ $id }}', {{ isset($message)? '\''.$message.'\''  : null }})"
     data-bs-toggle="tooltip" data-bs-placement="top" title="{{ $title ??__('common.Delete') }}">
     @isset($icon)
         {{$icon}}
@@ -21,4 +21,6 @@
             <span class="path5"></span>
         </i>
     @endif
+
+    {{ $textTitle ?? '' }}
 </a>

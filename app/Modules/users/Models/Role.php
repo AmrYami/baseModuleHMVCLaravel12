@@ -24,12 +24,14 @@ class Role extends BaseModel
     protected $fillable = [
         'name',
         'guard_name',
+        'created_by',
     ];
 
     protected $casts = [
         'id' => 'integer',
         'name' => 'string',
         'guard_name' => 'string',
+        'created_by' => 'integer',
     ];
 
     protected static function boot()
@@ -62,8 +64,9 @@ class Role extends BaseModel
      */
     public function users(): BelongsToMany
     {
+        $guard = $this->attributes['guard_name'] ?? config('auth.defaults.guard', 'web');
         return $this->morphedByMany(
-            getModelForGuard($this->attributes['guard_name']),
+            getModelForGuard($guard),
             'model',
             config('permission.table_names.model_has_roles'),
             'role_id',

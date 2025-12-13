@@ -1,4 +1,4 @@
-initSW();
+// initSW();
 function initSW() {
     if (!"serviceWorker" in navigator) {
         //service worker isn't supported
@@ -16,9 +16,9 @@ function initSW() {
     }
 
     //register the service worker
-    registerServiceWorker();
+    // registerServiceWorker();
 
-    console.log('serviceWorker installed!');
+    // console.log('serviceWorker installed!');
 }
 
 function registerServiceWorker() {
@@ -47,7 +47,7 @@ function initPush() {
             if (permissionResult !== 'granted') {
                 throw new Error('We weren\'t granted permission.');
             }
-            subscribeUser();
+            // subscribeUser();
         });
 }
 

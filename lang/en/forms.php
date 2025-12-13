@@ -2,4 +2,5 @@
 
 return [
     'name' => 'name',
+    'save' => 'Save',
 ];

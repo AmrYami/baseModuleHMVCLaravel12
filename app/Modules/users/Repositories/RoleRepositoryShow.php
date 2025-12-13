@@ -33,9 +33,22 @@ class RoleRepositoryShow extends BaseRepositoryShow implements RepositoryShow, B
      * @return Collection
      */
 
-    public function find_by(array $request, $perPage = 25)
+    public function find_by(array $request, $perPage = 200)
     {
-            return $this->paginate($request, $perPage);
+        $query = $this->allQuery($request, null, null, null)
+            ->where('guard_name', config('auth.defaults.guard', 'web'));
+
+        $user = auth()->user();
+        if ($user && !$user->hasRole('CRM Admin')) {
+            $query->where(function ($q) use ($user) {
+                $q->whereHas('users', function ($q2) use ($user) {
+                    $q2->where('model_has_roles.model_id', $user->id);
+                })
+                ->orWhere('created_by', $user->id);
+            });
+        }
+
+        return $query->paginate($perPage);
     }
 
 

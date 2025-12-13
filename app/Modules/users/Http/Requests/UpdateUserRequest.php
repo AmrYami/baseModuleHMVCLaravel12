@@ -3,27 +3,23 @@
 namespace Users\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Users\Models\User;
 
 class UpdateUserRequest extends FormRequest
 {
 
     public function rules()
     {
+        $userParam = $this->route('user');
+        $userId = $userParam instanceof User ? $userParam->getKey() : (hid_decode($userParam) ?? $userParam);
+
+        $roleInput = hid_decode($this->input('role')) ?? $this->input('role');
+        $this->merge(['role' => $roleInput]);
+
         return [
-            'name' => 'required|array',
-            'specialization' => 'nullable|array',
-            'hospital' => 'nullable|array',
-            'designation' => 'nullable|array',
-            'specialty' => 'nullable|array',
-            'languages' => 'nullable|array',
-            'experience' => 'nullable|array',
-            'description' => 'nullable|array',
-            'achievements' => 'nullable|array',
-            'studies' => 'nullable|array',
-            'work_experience' => 'nullable|array',
-            'email' => 'required|max:255|unique:users,email,'.$this->route('user'),
+            'email' => 'required|max:255|unique:users,email,'.$userId,
             'mobile' => 'required|regex:/[0-9]{6,20}/|nullable',
-            'user_name' => 'required|max:255|unique:users,user_name,'.$this->route('user'),
+            'user_name' => 'required|max:255|unique:users,user_name,'.$userId,
         ];
     }
 }

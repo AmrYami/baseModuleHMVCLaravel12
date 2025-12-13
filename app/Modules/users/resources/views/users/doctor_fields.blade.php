@@ -5,9 +5,9 @@
         <!--begin::Input group-->
         <div class="form-floating">
             <input type="text" class="form-control"
-                    placeholder="Name in English"
-                    value="{{$user?->getTranslation('name', 'en') ?? ''}}"
-                    maxlength="255" minlength="3" autocomplete="off" disabled/>
+                   placeholder="Name in English"
+                   value="{{$user?->getTranslation('name', 'en') ?? ''}}"
+                   maxlength="255" minlength="3" autocomplete="off" disabled/>
             <label for="floatingInput">Name (English)</label>
         </div>
         <!--end::Input group-->
@@ -17,9 +17,9 @@
         <!--begin::Input group-->
         <div class="form-floating">
             <input type="text" class="form-control"
-                    placeholder="Name in Arabic"
-                    value="{{$user?->getTranslation('name', 'ar') ?? ''}}"
-                    maxlength="255" minlength="3" autocomplete="off" disabled/>
+                   placeholder="Name in Arabic"
+                   value="{{$user?->getTranslation('name', 'ar') ?? ''}}"
+                   maxlength="255" minlength="3" autocomplete="off" disabled/>
             <label for="floatingInput">Name (Arabic) </label>
         </div>
         <!--end::Input group-->
@@ -30,64 +30,25 @@
 </div>
 
 
-<div id="doctorFields">
-    <!-- Tabs -->
-    <ul class="nav nav-tabs" id="doctorTabs" role="tablist">
+<div id="doctorFields" class="mt-5">
+
+    <ul class="nav nav-tabs nav-line-tabs nav-line-tabs-2x mb-5 fs-6">
         <li class="nav-item">
-            <a class="nav-link active" id="tab1-tab" data-toggle="tab" href="#tab1" role="tab"
-               aria-controls="tab1" aria-selected="true">Personal Info</a>
+            <a class="nav-link active" data-bs-toggle="tab" href="#personal-info">@lang('Personal Info')</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" id="tab2-tab" data-toggle="tab" href="#tab2" role="tab"
-               aria-controls="tab2" aria-selected="false">Experience</a>
+            <a class="nav-link" data-bs-toggle="tab" href="#experience">@lang('Experience')</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" id="tab3-tab" data-toggle="tab" href="#tab3" role="tab"
-               aria-controls="tab3" aria-selected="false">Media</a>
+            <a class="nav-link" data-bs-toggle="tab" href="#media">@lang('Media')</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" id="tab4-tab" data-toggle="tab" href="#tab4" role="tab"
-               aria-controls="tab4" aria-selected="false">Career History</a>
+            <a class="nav-link" data-bs-toggle="tab" href="#career-history">@lang('Career History')</a>
         </li>
     </ul>
 
-
-    <div class="tab-content mt-3">
-        <div class="tab-pane fade show active" id="tab1">
-            <!-- Specialization Field (English) -->
-            <div class="row">
-                <div class="form-group col-md-6 col-12">
-                    {!! html()->label('Specialization (English)')->for('specialization_en') !!}
-                    @if ($errors->has('specialization.en'))
-                        <small class="text-danger">{{ $errors->first('specialization.en') }}</small>
-                    @endif
-                    {!! html()->text('specialization[en]', $user?->getTranslation('specialization', 'en') ?? '')
-                        ->class('form-control')
-
-                        ->placeholder('Specialization in English')
-                        ->attribute('maxlength', 255)
-
-                        ->attribute('autocomplete', 'off')
-                    !!}
-                </div>
-
-                <!-- Specialization Field (Arabic) -->
-                <div class="form-group col-md-6 col-12">
-                    {!! html()->label('Specialization (Arabic)')->for('specialization_ar') !!}
-                    @if ($errors->has('specialization.ar'))
-                        <small class="text-danger">{{ $errors->first('specialization.ar') }}</small>
-                    @endif
-                    {!! html()->text('specialization[ar]', $user?->getTranslation('specialization', 'ar') ?? '')
-                        ->class('form-control')
-
-                        ->placeholder('Specialization in Arabic')
-                        ->attribute('maxlength', 255)
-
-                        ->attribute('autocomplete', 'off')
-                    !!}
-                </div>
-            </div>
-
+    <div class="tab-content">
+        <div class="tab-pane fade show active" id="personal-info" role="tabpanel">
 
             <!-- hospital Field (English) -->
             <div class="row">
@@ -101,7 +62,7 @@
 
                         ->placeholder('Hospital in English')
                         ->attribute('maxlength', 255)
-
+                        ->required()
                         ->attribute('autocomplete', 'off')
                     !!}
                 </div>
@@ -117,7 +78,7 @@
 
                         ->placeholder('Hospital in Arabic')
                         ->attribute('maxlength', 255)
-
+                        ->required()
                         ->attribute('autocomplete', 'off')
                     !!}
                 </div>
@@ -136,7 +97,7 @@
 
                         ->placeholder('Designation in English')
                         ->attribute('maxlength', 255)
-
+                        ->required()
                         ->attribute('autocomplete', 'off')
                     !!}
                 </div>
@@ -149,44 +110,9 @@
                     @endif
                     {!! html()->text('designation[ar]', $user?->getTranslation('designation', 'ar') ?? '')
                         ->class('form-control')
-
+                        ->required()
                         ->placeholder('Designation in Arabic')
                         ->attribute('maxlength', 255)
-
-                        ->attribute('autocomplete', 'off')
-                    !!}
-                </div>
-            </div>
-
-
-            <!-- Specialty Field -->
-            <div class="row">
-                <div class="form-group col-md-6 col-12">
-                    {!! html()->label('Specialty (English)')->for('specialty_en') !!}
-                    @if ($errors->has('specialty.en'))
-                        <small class="text-danger">{{ $errors->first('specialty.en') }}</small>
-                    @endif
-                    {!! html()->text('specialty[en]', $user?->getTranslation('specialty', 'en') ?? '')
-                        ->class('form-control')
-
-                        ->placeholder('Specialty in English')
-                        ->attribute('maxlength', 255)
-
-                        ->attribute('autocomplete', 'off')
-                    !!}
-                </div>
-
-                <div class="form-group col-md-6 col-12">
-                    {!! html()->label('Specialty (Arabic)')->for('specialty_ar') !!}
-                    @if ($errors->has('specialty.ar'))
-                        <small class="text-danger">{{ $errors->first('specialty.ar') }}</small>
-                    @endif
-                    {!! html()->text('specialty[ar]', $user?->getTranslation('specialty', 'ar') ?? '')
-                        ->class('form-control')
-
-                        ->placeholder('Specialty in Arabic')
-                        ->attribute('maxlength', 255)
-
                         ->attribute('autocomplete', 'off')
                     !!}
                 </div>
@@ -196,14 +122,77 @@
             <!-- Languages Field -->
             <div class="row">
                 <div class="form-group col-md-6 col-12">
-                    {!! html()->label('Languages (English)')->for('languages_en') !!}
-                    @if ($errors->has('languages.en'))
-                        <small class="text-danger">{{ $errors->first('languages.en') }}</small>
+
+                    {!! html()->label('Languages')->for('languages') !!}
+
+                    @if($errors->first('languages'))
+                        <br>
+                        <small class="text-danger">{{$errors->first('languages')}}</small>
                     @endif
-                    {!! html()->text('languages[en]', $user?->getTranslation('languages', 'en') ?? '')
+                    <x-layout.mt.forms.select2multible
+                        :name="'languages'"
+                        :options='$languages'
+                        :label="'Languages'"
+                        :required="true"
+                        :multiple="true"
+                        :selected='$user->languages ?? ""'
+                    />
+                </div>
+
+            </div>
+
+
+            <!-- nationality Field -->
+            <div class="row">
+                <div class="form-group col-md-6 col-12">
+
+                    {!! html()->label('Nationality')->for('nationality') !!}
+
+                    @if($errors->first('nationality'))
+                        <br>
+                        <small class="text-danger">{{$errors->first('nationality')}}</small>
+                    @endif
+
+                    <x-layout.mt.forms.select2multible
+                        :name="'nationality'"
+                        :options='$countries'
+                        :label="'Nationality'"
+                        :required="true"
+                        :multiple="true"
+                        :selected='$user->nationality ?? ""'
+                    />
+                </div>
+                <div class="form-group col-md-6 col-12">
+
+                    {!! html()->label('Specialty')->for('specialty') !!}
+
+                    @if($errors->first('specialty'))
+                        <br>
+                        <small class="text-danger">{{$errors->first('specialty')}}</small>
+                    @endif
+
+                    <x-layout.mt.forms.select2
+                        :name="'specialty'"
+                        :options='$specialties'
+                        :label="'Specialty'"
+                        :required="true"
+                        :selected='$user->specialty ?? ""'
+                    />
+                </div>
+            </div>
+
+
+            <!-- speciality_text Field -->
+            <div class="row">
+                <div class="form-group col-md-6 col-12">
+                    {!! html()->label('speciality text (English)')->for('speciality_text_en') !!}
+                    @if ($errors->has('speciality_text.en'))
+                        <small class="text-danger">{{ $errors->first('speciality_text.en') }}</small>
+                    @endif
+                    {!! html()->text('speciality_text[en]', $user?->getTranslation('speciality_text', 'en') ?? '')
                         ->class('form-control')
 
-                        ->placeholder('Languages in English')
+                        ->placeholder('speciality text in English')
                         ->attribute('maxlength', 255)
 
                         ->attribute('autocomplete', 'off')
@@ -211,14 +200,14 @@
                 </div>
 
                 <div class="form-group col-md-6 col-12">
-                    {!! html()->label('Languages (Arabic)')->for('languages_ar') !!}
-                    @if ($errors->has('languages.ar'))
-                        <small class="text-danger">{{ $errors->first('languages.ar') }}</small>
+                    {!! html()->label('speciality text (Arabic)')->for('speciality_text_ar') !!}
+                    @if ($errors->has('speciality_text.ar'))
+                        <small class="text-danger">{{ $errors->first('speciality_text.ar') }}</small>
                     @endif
-                    {!! html()->text('languages[ar]', $user?->getTranslation('languages', 'ar') ?? '')
+                    {!! html()->text('speciality_text[ar]', $user?->getTranslation('speciality_text', 'ar') ?? '')
                         ->class('form-control')
 
-                        ->placeholder('Languages in Arabic')
+                        ->placeholder('speciality text in Arabic')
                         ->attribute('maxlength', 255)
 
                         ->attribute('autocomplete', 'off')
@@ -227,10 +216,142 @@
             </div>
 
 
+            <!-- facilities Field -->
+            <div class="row">
+                <div class="form-group col-md-6 col-12">
+                    {!! html()->label('facilities (English)')->for('facilities_en') !!}
+                    @if ($errors->has('facilities.en'))
+                        <small class="text-danger">{{ $errors->first('facilities.en') }}</small>
+                    @endif
+                    {!! html()->text('facilities[en]', $user?->getTranslation('facilities', 'en') ?? '')
+                        ->class('form-control')
+
+                        ->placeholder('facilities in English')
+                        ->attribute('maxlength', 255)
+
+                        ->attribute('autocomplete', 'off')
+                    !!}
+                </div>
+
+                <div class="form-group col-md-6 col-12">
+                    {!! html()->label('facilities (Arabic)')->for('facilities_ar') !!}
+                    @if ($errors->has('facilities.ar'))
+                        <small class="text-danger">{{ $errors->first('facilities.ar') }}</small>
+                    @endif
+                    {!! html()->text('facilities[ar]', $user?->getTranslation('facilities', 'ar') ?? '')
+                        ->class('form-control')
+
+                        ->placeholder('facilities in Arabic')
+                        ->attribute('maxlength', 255)
+
+                        ->attribute('autocomplete', 'off')
+                    !!}
+                </div>
+            </div>
+
+
+            <!-- clinics Field -->
+            <div class="row">
+                <div class="form-group col-md-6 col-12">
+                    {!! html()->label('clinics (English)')->for('clinics_en') !!}
+                    @if ($errors->has('clinics.en'))
+                        <small class="text-danger">{{ $errors->first('clinics.en') }}</small>
+                    @endif
+                    {!! html()->text('clinics[en]', $user?->getTranslation('clinics', 'en') ?? '')
+                        ->class('form-control')
+
+                        ->placeholder('clinics in English')
+                        ->attribute('maxlength', 255)
+
+                        ->attribute('autocomplete', 'off')
+                    !!}
+                </div>
+
+                <div class="form-group col-md-6 col-12">
+                    {!! html()->label('clinics (Arabic)')->for('clinics_ar') !!}
+                    @if ($errors->has('clinics.ar'))
+                        <small class="text-danger">{{ $errors->first('clinics.ar') }}</small>
+                    @endif
+                    {!! html()->text('clinics[ar]', $user?->getTranslation('clinics', 'ar') ?? '')
+                        ->class('form-control')
+
+                        ->placeholder('clinics in Arabic')
+                        ->attribute('maxlength', 255)
+
+                        ->attribute('autocomplete', 'off')
+                    !!}
+                </div>
+            </div>
+
+
+            <!-- clinic_text Field -->
+            <div class="row">
+                <div class="form-group col-md-6 col-12">
+                    {!! html()->label('clinic text (English)')->for('clinic_text_en') !!}
+                    @if ($errors->has('clinic_text.en'))
+                        <small class="text-danger">{{ $errors->first('clinic_text.en') }}</small>
+                    @endif
+                    {!! html()->text('clinic_text[en]', $user?->getTranslation('clinic_text', 'en') ?? '')
+                        ->class('form-control')
+
+                        ->placeholder('clinic_text in English')
+                        ->attribute('maxlength', 255)
+
+                        ->attribute('autocomplete', 'off')
+                    !!}
+                </div>
+
+                <div class="form-group col-md-6 col-12">
+                    {!! html()->label('clinic text (Arabic)')->for('clinic_text_ar') !!}
+                    @if ($errors->has('clinic_text.ar'))
+                        <small class="text-danger">{{ $errors->first('clinic_text.ar') }}</small>
+                    @endif
+                    {!! html()->text('clinic_text[ar]', $user?->getTranslation('clinic_text', 'ar') ?? '')
+                        ->class('form-control')
+
+                        ->placeholder('clinic_text in Arabic')
+                        ->attribute('maxlength', 255)
+
+                        ->attribute('autocomplete', 'off')
+                    !!}
+                </div>
+            </div>
+
+
+            <!-- book_an_appointment_URL Field -->
+            <div class="row">
+                <div class="form-group col-md-6 col-12">
+                    {!! html()->label('book an appointment URL')->for('book_an_appointment_URL') !!}
+                    @if ($errors->has('book_an_appointment_URL'))
+                        <small class="text-danger">{{ $errors->first('book_an_appointment_URL') }}</small>
+                    @endif
+                    {!! html()->text('book_an_appointment_URL', $user?->book_an_appointment_URL ?? '')
+                        ->class('form-control')
+
+                        ->placeholder('book an appointment URL')
+                        ->attribute('maxlength', 255)
+
+                        ->attribute('autocomplete', 'off')
+                    !!}
+                </div>
+
+                <div class="form-group col-md-6 col-12">
+                    {!! html()->label('head of department')->for('head_of_department') !!}
+                    @if ($errors->has('head_of_department'))
+                        <small class="text-danger">{{ $errors->first('head_of_department') }}</small>
+                    @endif
+                    {!! html()->text('head_of_department', $user?->head_of_department ?? '')
+                        ->class('form-control')
+
+                        ->placeholder('head of department')
+                        ->attribute('maxlength', 255)
+
+                        ->attribute('autocomplete', 'off')
+                    !!}
+                </div>
+            </div>
         </div>
-        <div class="tab-pane fade" id="tab2">
-
-
+        <div class="tab-pane fade" id="experience" role="tabpanel">
             <!-- Experience Field -->
             <div class="row">
                 <div class="form-group col-md-6 col-12">
@@ -240,7 +361,7 @@
                     @endif
                     {!! html()->text('experience[en]', $user?->getTranslation('experience', 'en') ?? '')
                         ->class('form-control')
-
+->required()
                         ->placeholder('Experience in English')
                         ->attribute('maxlength', 255)
 
@@ -255,7 +376,7 @@
                     @endif
                     {!! html()->text('experience[ar]', $user?->getTranslation('experience', 'ar') ?? '')
                         ->class('form-control')
-
+->required()
                         ->placeholder('Experience in Arabic')
                         ->attribute('maxlength', 255)
 
@@ -277,7 +398,7 @@
 
                         ->placeholder('Description in English')
                         ->attribute('maxlength', 1000)
-
+->required()
                         ->attribute('autocomplete', 'off')
                     !!}
                 </div>
@@ -292,7 +413,7 @@
 
                         ->placeholder('Description in Arabic')
                         ->attribute('maxlength', 1000)
-
+->required()
                         ->attribute('autocomplete', 'off')
                     !!}
                 </div>
@@ -307,7 +428,7 @@
                     @endif
                     {!! html()->textarea('achievements[en]', $user?->getTranslation('achievements', 'en') ?? '')
                         ->class('form-control')
-
+->required()
                         ->placeholder('Achievements in English')
                         ->attribute('maxlength', 1000)
                         ->attribute('autocomplete', 'off')
@@ -321,7 +442,7 @@
                     @endif
                     {!! html()->textarea('achievements[ar]', $user?->getTranslation('achievements', 'ar') ?? '')
                         ->class('form-control')
-
+->required()
                         ->placeholder('Achievements in Arabic')
                         ->attribute('maxlength', 1000)
                         ->attribute('autocomplete', 'off')
@@ -338,7 +459,7 @@
                     @endif
                     {!! html()->textarea('studies[en]', $user?->getTranslation('studies', 'en') ?? '')
                         ->class('form-control')
-
+->required()
                         ->placeholder('Studies in English')
                         ->attribute('maxlength', 1000)
                         ->attribute('autocomplete', 'off')
@@ -355,47 +476,72 @@
 
                         ->placeholder('Studies in Arabic')
                         ->attribute('maxlength', 1000)
-
+->required()
                         ->attribute('autocomplete', 'off')
                     !!}
                 </div>
             </div>
-
-
         </div>
-        <div class="tab-pane fade" id="tab3">
-
+        <div class="tab-pane fade" id="media" role="tabpanel">
 
 
             <div class="row">
+
                 <div class="form-group col-md-6 col-12">
-                    {!! html()->label('avatar', 'Avatar:') !!}
-                    @if($errors->first('avatar'))
-                        <br>
-                        <small class="text-danger">{{$errors->first('avatar')}}</small>
-                    @endif
-                    <div class="custom-file">
-                        {!! html()->file('avatar')->class('form-control') !!}
+                    {!! Html::label('profile image', 'Profile Image:', ['class' => 'form-label']) !!}
+                    <div class="form-group">
+                        <div class="image-input image-input-outline" data-kt-image-input="true">
+                            <!-- Preview Image -->
+                            <div class="image-input-wrapper w-125px h-125px" id="preview-container"
+                                 style="background-image:
+                                 url('{{ isset($user) && $user->getMedia('avatar')->first() ? $user->getMedia('avatar')->first()->getUrl() : asset('assets/images/default-profile.png') }}');
+                                  margin-bottom: 0.2rem">
+                            </div>
+
+                            <!-- Upload Button -->
+                            <label class="btn btn-icon btn-active-color-primary bg-white shadow"
+                                   data-kt-image-input-action="change" style="margin-top: 0.5rem">
+                                {{--                                <input type="file" name="avatar" id="image-upload" class="d-none" accept="image/*">--}}
+                                {!! html()->file('avatar')->class('d-none')->id("image-upload") !!}
+                                <span><img src="{{ asset('assets/icons/add.svg') }}" alt="Remove" width="20"></span>
+                            </label>
+
+                            <!-- Remove Button -->
+                            <span class="btn btn-icon btn-active-color-primary bg-white shadow"
+                                  data-kt-image-input-action="remove" id="remove-image">
+                                        <img src="{{ asset('assets/icons/remove.svg') }}" alt="Remove" width="20">
+                            </span>
+                        </div>
                     </div>
                 </div>
 
 
                 <div class="form-group col-md-6 col-12">
-                    {!! html()->label('certificates', 'Certificates:') !!}
-                    @if($errors->first('certificates'))
-                        <br>
-                        <small class="text-danger">{{$errors->first('certificates')}}</small>
-                    @endif
-                    <div class="custom-file">
-                        <input type="file" name='mediafile[documents][]' class="form-control" multiple>
+                    {!! Html::label('certificates', 'Certificates:', ['class' => 'form-label']) !!}
+                    <input type="file" name="mediafile[documents][]" id="certificates-upload" class="form-control"
+                           multiple>
+
+                    <input type="hidden" name="delete" id="delete-certificates" value="">
+
+                    <div class="mt-3">
+                        <h5>Existing Certificates:</h5>
+                        <ul id="existing-certificates">
+                            @foreach($user->getMedia('documents') as $certificate)
+                                <li id="certificate-{{ $certificate->id }}">
+                                    <a href="{{ $certificate->getUrl() }}"
+                                       target="_blank">{{ $certificate->file_name }}</a>
+                                    <button type="button" class="btn btn-sm btn-danger ms-2 delete-certificate"
+                                            data-id="{{ $certificate->id }}">
+                                        <img src="{{ asset('assets/icons/remove.svg') }}" alt="Delete" width="15">
+                                    </button>
+                                </li>
+                            @endforeach
+                        </ul>
                     </div>
                 </div>
             </div>
-
-
-
         </div>
-        <div class="tab-pane fade" id="tab4">
+        <div class="tab-pane fade" id="career-history" role="tabpanel">
 
             <!-- Work Experience Field -->
             <div class="row">
@@ -410,7 +556,7 @@
 
                         ->placeholder('Work Experience in English')
                         ->attribute('maxlength', 1000)
-
+->required()
                         ->attribute('autocomplete', 'off')
                     !!}
                 </div>
@@ -426,25 +572,12 @@
 
                         ->placeholder('Work Experience in Arabic')
                         ->attribute('maxlength', 1000)
-
+->required()
                         ->attribute('autocomplete', 'off')
                     !!}
                 </div>
             </div>
         </div>
     </div>
-
-    {{--    <div class="tab-pane fade" id="tab2">--}}
-    {{--        <label>Years of Experience:</label>--}}
-    {{--        <input type="number" class="form-control" name="experience">--}}
-    {{--    </div>--}}
-    {{--    <div class="tab-pane fade" id="tab3">--}}
-    {{--        <label>Upload Certificates:</label>--}}
-    {{--        <input type="file" class="form-control" name="certificates">--}}
-    {{--    </div>--}}
-    {{--    <div class="tab-pane fade" id="tab4">--}}
-    {{--        <label>Career History:</label>--}}
-    {{--        <textarea class="form-control" name="career_history"></textarea>--}}
-    {{--    </div>--}}
 </div>
 

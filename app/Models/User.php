@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+//use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -12,6 +12,8 @@ use Laravel\Jetstream\HasTeams;
 use Laravel\Sanctum\HasApiTokens;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 use Users\Models\Role;
+use Spatie\Permission\Traits\HasRoles;
+use App\Support\Concerns\UsesHashids;
 
 class User extends Authenticatable implements JWTSubject
 {
@@ -19,10 +21,12 @@ class User extends Authenticatable implements JWTSubject
 
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory;
+    use HasRoles;
     use HasProfilePhoto;
     use HasTeams;
     use Notifiable;
     use TwoFactorAuthenticatable;
+    use UsesHashids;
 
     /**
      * The attributes that are mass assignable.
@@ -40,6 +44,8 @@ class User extends Authenticatable implements JWTSubject
         'password',
         'type',
     ];
+
+    protected $guard_name = 'web';
 
     /**
      * The attributes that should be hidden for serialization.
@@ -60,6 +66,7 @@ class User extends Authenticatable implements JWTSubject
      */
     protected $appends = [
         'profile_photo_url',
+        'hashid',
     ];
 
     /**
@@ -73,6 +80,24 @@ class User extends Authenticatable implements JWTSubject
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function setNameAttribute($value): void
+    {
+        if (is_array($value) || is_object($value)) {
+            $this->attributes['name'] = json_encode($value);
+            return;
+        }
+        $this->attributes['name'] = json_encode(['en' => (string) $value]);
+    }
+
+    public function getNameAttribute($value)
+    {
+        $decoded = json_decode($value, true);
+        if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+            return $decoded['en'] ?? reset($decoded) ?? '';
+        }
+        return $value;
     }
 
     /**

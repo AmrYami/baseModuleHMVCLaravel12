@@ -15,7 +15,9 @@
             @isset($icon)
                 {{$icon}}
             @endisset
-            {{$title}}
+            <span class="mx-3">
+                {{$title}}
+            </span>
         </a>
     </div>
 <!--end::Menu item-->

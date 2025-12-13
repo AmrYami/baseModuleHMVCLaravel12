@@ -26,7 +26,7 @@
                 {{--                                <td>--}}
                 {{--                                    <div class='btn-group'>--}}
                 {{--                                        @can('edit-users')--}}
-                {{--                                            <a href="{{ route('users.restore', [$user->id]) }}"--}}
+                {{--                                            <a href="{{ route('dashboard.users.restore', [$user->id]) }}"--}}
                 {{--                                               class='btn btn-default btn-xs'><i class="fas fa-trash-restore"></i></a>--}}
                 {{--                                        @endcan--}}
                 {{--                                    </div>--}}
@@ -36,11 +36,11 @@
                     @if($user->id != 1)
                     <div class='btn-group'>
                         @can('edit-users')
-                            <a href="{{ route('users.edit', [$user->id]) }}"
+                            <a href="{{ route('dashboard.users.edit', [$user->hashid ?? hid($user->id)]) }}"
                                class='btn btn-default btn-xs'><i class="fa fa-edit"></i></a>
                         @endcan
                         @can("delete-users")
-                                {!! html()->form('DELETE', route('users.destroy', $user->id))
+                                {!! html()->form('DELETE', route('dashboard.users.destroy', $user->hashid ?? hid($user->id)))
                                     ->class('d-inline-block')
                                     ->open()
                                 !!}
@@ -52,19 +52,11 @@
 
                                 {!! html()->closeModelForm() !!}
 
-                                @if($user->freeze == 0)
-                                    {!! html()->form('PUT', route('users.freeze', $user->id))
-                                        ->class('d-inline-block')
-                                        ->open() !!}
-
-                                    {!! html()->button('Freeze')
-                                        ->type('submit')
-                                        ->class('btn btn-danger btn-xs')
-                                        ->attribute('onclick', "return confirm('Are you sure you want to freeze this user?')") !!}
-
-                                    {!! html()->closeModelForm() !!}
+                                @php $isBanned = isset($user->banned_until) && now()->lt($user->banned_until); @endphp
+                                @if(!$user->freeze && !$isBanned)
+                                    <a href="{{ route('dashboard.users.freeze.form', $user->hashid ?? hid($user->id)) }}" class="btn btn-danger btn-xs">Freeze</a>
                                 @else
-                                    {!! html()->form('PUT', route('users.un_freeze', $user->id))
+                                    {!! html()->form('PUT', route('dashboard.users.un_freeze', $user->hashid ?? hid($user->id)))
                                         ->class('d-inline-block')
                                         ->open() !!}
 

@@ -29,7 +29,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php-versions: ['8.1']
+        php-versions: ['8.4']
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -45,7 +45,7 @@ jobs:
         id: composercache
         run: echo "::set-output name=dir::$(composer config cache-files-dir)"
       - name: Cache composer dependencies
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: ${{ steps.composercache.outputs.dir }}
           # Use composer.json for key, if composer.lock is not committed.
@@ -59,12 +59,20 @@ jobs:
       - name: Migrate Test Database
         run: php artisan migrate --env=testing --seed --force
         env:
+          DB_HOST: 127.0.0.1
           DB_PORT: ${{ job.services.mysql.ports['3306'] }}
+          DB_DATABASE: test_db
+          DB_USERNAME: root
+          DB_PASSWORD: test_db
           REDIS_PORT: ${{ job.services.redis.ports['6379'] }}
       - name: Change Directory Permissions
         run: chmod -R 777 storage bootstrap/cache
-      - name: Execute tests (Unit and Feature tests) via PHPUnit
-        run: vendor/bin/phpunit
+      - name: Execute tests via Pest
+        run: vendor/bin/pest
         env:
+          DB_HOST: 127.0.0.1
           DB_PORT: ${{ job.services.mysql.ports['3306'] }}
+          DB_DATABASE: test_db
+          DB_USERNAME: root
+          DB_PASSWORD: test_db
           REDIS_PORT: ${{ job.services.redis.ports['6379'] }}

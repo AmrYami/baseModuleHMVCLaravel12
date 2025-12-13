@@ -4,7 +4,7 @@
     <div class="offcanvas-header d-flex align-items-center justify-content-between pb-5">
         <h3 class="font-weight-bold m-0">@lang('users.User Profile')
             <small class="text-muted font-size-sm ml-2"></small></h3>
-        <a href="{{route("my_profile")}}" class="btn btn-xs btn-icon btn-light btn-hover-primary"
+        <a href="{{route("dashboard.my_profile")}}" class="btn btn-xs btn-icon btn-light btn-hover-primary"
            id="kt_quick_user_close">
             <i class="ki ki-close icon-xs text-muted"></i>
         </a>
@@ -15,16 +15,22 @@
         <!--begin::Header-->
         <div class="d-flex align-items-center mt-5">
             <div class="symbol symbol-100 mr-5">
-                @if (count(Auth::user()->getMedia('avatar')) > 0)
-                    @foreach(Auth::user()->getMedia('avatar') as $file)
-                        <div class="symbol-label" style="background-image:url({{asset('storage/'.$file->id.'/'.$file->file_name)}})"></div>
-                    @endforeach
-                @endif
-
+                @php
+                    $avatar = Auth::user()->getMedia('avatar')->first();
+                    $avatarUrl = null;
+                    if ($avatar) {
+                        $disk = \Illuminate\Support\Facades\Storage::disk($avatar->disk ?? config('media-library.disk_name', 'media'));
+                        $key = $avatar->getPathRelativeToRoot();
+                        if ($disk->exists($key)) {
+                            $avatarUrl = $avatar->getUrl();
+                        }
+                    }
+                @endphp
+                <div class="symbol-label" style="background-image:url({{ $avatarUrl ?? asset('assets/images/default-profile.png') }})"></div>
                 <i class="symbol-badge bg-success"></i>
             </div>
             <div class="d-flex flex-column">
-                <a href="{{route("my_profile")}}"
+                <a href="{{route("dashboard.my_profile")}}"
                    class="font-weight-bold font-size-h5 text-dark-75 text-hover-primary">{{auth()->user()->name}}</a>
                 <div class="text-muted mt-1">{{auth()->user()->type}}</div>
                 <div class="navi mt-2">

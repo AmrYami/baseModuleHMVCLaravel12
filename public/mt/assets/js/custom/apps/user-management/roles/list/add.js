@@ -4,6 +4,9 @@
 var KTUsersAddRole = function () {
     // Shared variables
     const element = document.getElementById('kt_modal_add_role');
+    if (!element) {
+        return { init: function() {} };
+    }
     const form = element.querySelector('#kt_modal_add_role_form');
     const modal = new bootstrap.Modal(element);
 

@@ -9,16 +9,20 @@ class MoreImplementation
     private static $orWhere = [];
     private static $whereIn = [];
     private static $whereHas = [];
+    private static $whereDoesntHave = [];
     private static $moreConditionsInFirstLevel = [];
 
-    public static function reset(){
+    public static function reset()
+    {
         self::$with = [];
         self::$orWhere = [];
         self::$whereIn = [];
         self::$whereHas = [];
+        self::$whereDoesntHave = [];
         self::$withQuery = [];
         self::$moreConditionsInFirstLevel = [];
     }
+
     /**
      * @return array
      */
@@ -34,6 +38,7 @@ class MoreImplementation
     {
         array_push(self::$with, $with);
     }
+
     /**
      * @return array
      */
@@ -49,6 +54,7 @@ class MoreImplementation
     {
         array_push(self::$moreConditionsInFirstLevel, $moreConditionsInFirstLevel);
     }
+
     /**
      * @return array
      */
@@ -96,6 +102,7 @@ class MoreImplementation
     {
         array_push(self::$whereIn, $whereIn);
     }
+
     /**
      * @return array
      */
@@ -104,6 +111,7 @@ class MoreImplementation
         return self::$whereHas;
     }
 
+
     /**
      * @param array $whereHas
      */
@@ -111,5 +119,23 @@ class MoreImplementation
     {
         array_push(self::$whereHas, $whereHas);
     }
+
+    /**
+     * @return array
+     */
+    public static function getWhereDoesntHave(): array
+    {
+        return self::$whereDoesntHave;
+    }
+
+    /**
+     * @param array $whereDoesntHave
+     */
+    public static function setWhereDoesntHave(array $whereDoesntHave): void
+    {
+        array_push(self::$whereDoesntHave, $whereDoesntHave);
+    }
+
+
 
 }

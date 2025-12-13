@@ -5,7 +5,11 @@
             :options='$roles'
             :label="'Role'"
             :required="true"
+            :value="old('role', $selected ?? '')"
         />
+        @if(isset($userRoleId))
+            <input type="hidden" id="user-role-id" value="{{ $userRoleId }}">
+        @endif
 
         @if($errors->first('role'))
             <br>

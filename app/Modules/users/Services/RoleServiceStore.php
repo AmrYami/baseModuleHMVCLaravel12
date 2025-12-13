@@ -49,10 +49,13 @@ class RoleServiceStore extends Service implements ServiceStore
     {
 //        try {
             $request->request->add(['guard_name' => 'web']);
-            $data = $request->only($this->model->getFillable());
-            $role = $this->roleRepositoryStore->create($data);
-            $this->roleRepositoryStore->syncPermissions($request->selected, $role);
-            return $role;
+        $data = $request->only($this->model->getFillable());
+        $role = $this->roleRepositoryStore->create(array_merge($data, [
+            'created_by' => $request->user()?->id,
+        ]));
+        $this->roleRepositoryStore->syncPermissions($request->selected, $role);
+
+        return $role;
 //        } catch (\Exception $exception) {
 //            return false;
 //        }
@@ -108,4 +111,3 @@ class RoleServiceStore extends Service implements ServiceStore
         return $this->repo->restore($request, $id);
     }
 }
-

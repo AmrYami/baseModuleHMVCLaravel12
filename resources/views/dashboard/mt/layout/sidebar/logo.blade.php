@@ -1,8 +1,8 @@
 <div class="app-sidebar-logo px-6 mx-1 mt-2 bg-white" id="kt_app_sidebar_logo">
     <!--begin::Logo image-->
     <a href="{{ route("dashboard") }}">
-        <img alt="Logo" src="{{ asset("mt/assets/media/logos/fakeeh_log.png") }}" class="h-75px app-sidebar-logo-default" />
-        <img alt="Logo" src="{{ asset("mt/assets/media/logos/fakeeh-faveicon.png") }}" class="app-sidebar-logo-minimize" />
+`        <img alt="Logo" src="{{ asset("mt/assets/media/logos/fakeeh_log.png") }}" class="h-75px app-sidebar-logo-default" />
+`        <img alt="Logo" src="{{ asset("mt/assets/media/logos/fakeeh-faveicon.png") }}" class="app-sidebar-logo-minimize" />
     </a>
     <!--end::Logo image-->
     <!--begin::Sidebar toggle-->

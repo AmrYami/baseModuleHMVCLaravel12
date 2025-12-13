@@ -2,14 +2,20 @@
 
 namespace Users\Models;
 
+use App\Enum\DefaultValuesEnum;
+use App\Models\ApplicationStatus;
 use App\Models\BaseAuthModel;
+use App\Models\Exam\Exam;
+
+//use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Users\Models\RequestModel;
 use App\Notifications\ResetPassword;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Jetstream\HasProfilePhoto;
 use Laravel\Jetstream\HasTeams;
 use Laravel\Sanctum\HasApiTokens;
-use Spatie\Activitylog\LogOptions;
 use Spatie\Permission\Traits\HasRoles;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 use Illuminate\Notifications\Notifiable;
@@ -31,6 +37,7 @@ class User extends BaseAuthModel implements HasMedia, JWTSubject
     use HasProfilePhoto;
     use HasTeams;
     use TwoFactorAuthenticatable;
+
     /**
      * The attributes that are mass assignable.
      *
@@ -55,36 +62,26 @@ class User extends BaseAuthModel implements HasMedia, JWTSubject
         'freeze',
         'code',
         'status',
+        'approve',
         'banned_until',
-        'specialization',
-        'hospital',
-        'designation',
-        'specialty',
-        'languages',
-        'experience',
-        'description',
-        'achievements',
-        'studies',
-        'work_experience',
-        'email_verified_at',
+        'IBAN',
+        'agrement', 'teammember', 'title',  'topic', 'teamleader', 'abstract', 'national_id', 'nationality', 'religion', 'city', 'educational',
+
+
+        'first_name', 'second_name', 'last_name', 'commitments_description', 'speciality',
+
+        'created_by'
     ];
+
+//
+//Doctor Video URLs(multi)
     /**
      * The attributes that are translatable.
      *
      * @var array
      */
     public $translatable = [
-        'name',
-        'specialization',
-        'hospital',
-        'designation',
-        'specialty',
-        'languages',
-        'experience',
-        'description',
-        'achievements',
-        'studies',
-        'work_experience',
+        'name', 'first_name', 'second_name', 'last_name'
     ];
     /**
      * The attributes that should be hidden for arrays.
@@ -109,6 +106,12 @@ class User extends BaseAuthModel implements HasMedia, JWTSubject
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
+        'languages' => 'array',
+        'nationality' => 'array',
+    ];
+
+    protected $appends = [
+        'hashid',
     ];
     /**
      * Validation rules
@@ -119,6 +122,25 @@ class User extends BaseAuthModel implements HasMedia, JWTSubject
 
     ];
 
+    public function fullName(): Attribute
+    {
+        return Attribute::make(get: function (): string {
+            return $this->first_name . " " . $this->second_name . " " . $this->last_name;
+        });
+    }
+
+    public function fullArName():Attribute
+    {
+        return Attribute::make(get: function (): string {
+            return $this?->getTranslation('first_name', 'ar') . ' '. $this?->getTranslation('second_name', 'ar') . ' '. $this?->getTranslation('last_name', 'ar');
+        });
+    }
+
+
+    /**
+     * @param $role
+     * @return bool
+     */
     public function hasGlobalRole($role)
     {
         if ($this->hasRole('CRM Admin')) {
@@ -129,11 +151,16 @@ class User extends BaseAuthModel implements HasMedia, JWTSubject
     }
 
 
-    public function sendPasswordResetNotification($token)
-    {
-        // Your own implementation.
-        $this->notify(new ResetPassword($token));
-    }
+    /**
+     * @param $token
+     * @return void
+     */
+//    public function sendPasswordResetNotification($token)
+//    {
+//        // Your own implementation.
+//        $this->notify(new ResetPassword($token));
+//    }
+
 
     /**
      * Get the identifier that will be stored in the subject claim of the JWT.
@@ -155,9 +182,4 @@ class User extends BaseAuthModel implements HasMedia, JWTSubject
         return [];
     }
 
-
-//    public function getFillable()
-//    {
-//    }
 }
-

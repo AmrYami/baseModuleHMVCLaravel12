@@ -3,16 +3,34 @@
 return [
 
     /*
-     * A policy will determine which CSP headers will be set. A valid CSP policy is
-     * any class that extends `Spatie\Csp\Policies\Policy`
+     * Presets determine which CSP headers will be set. A valid CSP preset is
+     * any class that implements `Spatie\Csp\Preset`.
      */
-    'policy' => Spatie\Csp\Policies\Basic::class,
+    'presets' => [
+        App\Policies\Csp\AppCspPolicy::class,
+    ],
+
+    /**
+     * Register additional global CSP directives here.
+     */
+    'directives' => [
+        //
+    ],
 
     /*
-     * This policy which will be put in report only mode. This is great for testing out
-     * a new policy or changes to existing csp policy without breaking anything.
+     * These presets will be put in a report-only policy. This is great for testing out
+     * a new policy or changes to existing CSP policy without breaking anything.
      */
-    'report_only_policy' => '',
+    'report_only_presets' => env('CSP_REPORT_ONLY', true)
+        ? [App\Policies\Csp\AppCspPolicy::class]
+        : [],
+
+    /**
+     * Register additional global report-only CSP directives here.
+     */
+    'report_only_directives' => [
+        //
+    ],
 
     /*
      * All violations against the policy will be reported to this url.
@@ -26,6 +44,11 @@ return [
      * Headers will only be added if this setting is set to true.
      */
     'enabled' => env('CSP_ENABLED', true),
+
+    /**
+     * Headers will be added when Vite is hot reloading.
+     */
+    'enabled_while_hot_reloading' => env('CSP_ENABLED_WHILE_HOT_RELOADING', false),
 
     /*
      * The class responsible for generating the nonces used in inline tags and headers.

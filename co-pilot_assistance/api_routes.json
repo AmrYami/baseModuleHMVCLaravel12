@@ -1,0 +1,26 @@
+{
+  "profile": {
+    "complete": {
+      "GET": {"name": "profile.complete", "middleware": ["auth", "verified", "permission:hr.profile.view"]},
+      "POST": {"name": "profile.complete.store", "middleware": ["auth", "verified", "permission:hr.profile.save"]}
+    },
+    "upload": {
+      "POST": {"name": "profile.upload", "middleware": ["auth", "verified", "permission:hr.uploads.create"]},
+      "DELETE": {"name": "profile.upload.destroy", "middleware": ["auth", "verified", "permission:hr.uploads.destroy"]}
+    },
+    "change_requests": {
+      "GET": {"name": "profile.change_requests.index", "middleware": ["auth", "verified", "permission:hr.change_requests.index"]},
+      "POST": {"name": "profile.change_requests.store", "middleware": ["auth", "verified", "permission:hr.change_requests.store"]}
+    }
+  },
+  "admin": {
+    "forms": {
+      "publish": {"POST": {"name": "admin.hr.forms.publish", "middleware": ["auth", "verified", "permission:hr.forms.publish"]}},
+      "duplicate": {"POST": {"name": "admin.hr.forms.duplicate", "middleware": ["auth", "verified", "permission:hr.forms.duplicate"]}},
+      "bulk_fields": {"POST": {"name": "admin.hr.forms.fields.bulk", "middleware": ["auth", "verified", "permission:hr.fields.store"]}}
+    },
+    "stages": {
+      "store": {"POST": {"name": "admin.hr.stages.store", "middleware": ["auth", "verified", "permission:hr.stages.store"]}}
+    }
+  }
+}
