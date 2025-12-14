@@ -28,6 +28,10 @@ class Kernel extends ConsoleKernel
                 '--chunk' => 5000,
             ])->sundays()->at('03:00')->withoutOverlapping();
         }
+
+        // Security hygiene: prune expired Sanctum tokens and stale password reset tokens nightly
+        $schedule->command('sanctum:prune-expired --hours=24')->dailyAt('01:15')->withoutOverlapping();
+        $schedule->command('auth:clear-resets')->dailyAt('01:30')->withoutOverlapping();
     }
 
     protected function commands(): void

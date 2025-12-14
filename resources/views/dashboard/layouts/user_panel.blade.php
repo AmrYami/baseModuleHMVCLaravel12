@@ -1,4 +1,11 @@
 <!-- begin::User Panel-->
+<style nonce="{{ csp_nonce() }}">
+    .user-panel-avatar {
+        background-image: url('{{ $avatarUrl ?? asset('assets/images/default-profile.png') }}');
+        background-size: cover;
+        background-position: center;
+    }
+</style>
 <div id="kt_quick_user" class="offcanvas offcanvas-right p-10">
     <!--begin::Header-->
     <div class="offcanvas-header d-flex align-items-center justify-content-between pb-5">
@@ -26,7 +33,7 @@
                         }
                     }
                 @endphp
-                <div class="symbol-label" style="background-image:url({{ $avatarUrl ?? asset('assets/images/default-profile.png') }})"></div>
+                <div class="symbol-label user-panel-avatar" data-avatar-url="{{ $avatarUrl ?? asset('assets/images/default-profile.png') }}"></div>
                 <i class="symbol-badge bg-success"></i>
             </div>
             <div class="d-flex flex-column">

@@ -26,3 +26,7 @@
 <!--end::Layout Themes-->
 <link rel="stylesheet" href="{{ asset('assets/media/logos/favicon.ico') }}">
 <link rel="stylesheet" href="{{ asset('assets/css/main.css') }}">
+<style nonce="{{ csp_nonce() }}">
+    .header-profile-bg { background-image: url("{{ asset('assets/media/misc/bg-1.jpg') }}"); }
+    .menu-submenu-wide { width: 1000px; }
+</style>

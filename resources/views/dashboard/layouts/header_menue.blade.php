@@ -193,7 +193,7 @@
                 <span class="menu-text">Features</span>
                 <i class="menu-arrow"></i>
             </a>
-            <div class="menu-submenu menu-submenu-fixed menu-submenu-left" style="width:1000px">
+            <div class="menu-submenu menu-submenu-fixed menu-submenu-left menu-submenu-wide">
                 <div class="menu-subnav">
                     <ul class="menu-content">
                         <li class="menu-item">

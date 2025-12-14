@@ -25,5 +25,4 @@
 <script src="{{ asset('js/main.js') }}"></script>
 {{--{{ Html::script('js/main.js') }}--}}
 
-
 {{-- socket.io temporarily disabled until server is ready --}}

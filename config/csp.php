@@ -21,7 +21,7 @@ return [
      * These presets will be put in a report-only policy. This is great for testing out
      * a new policy or changes to existing CSP policy without breaking anything.
      */
-    'report_only_presets' => env('CSP_REPORT_ONLY', true)
+    'report_only_presets' => env('CSP_REPORT_ONLY', false)
         ? [App\Policies\Csp\AppCspPolicy::class]
         : [],
 
@@ -38,7 +38,7 @@ return [
      *
      * You can override this setting by calling `reportTo` on your policy.
      */
-    'report_uri' => env('CSP_REPORT_URI', ''),
+    'report_uri' => env('CSP_REPORT_URI', '/api/csp-report'),
 
     /*
      * Headers will only be added if this setting is set to true.

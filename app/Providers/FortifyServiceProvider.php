@@ -48,6 +48,24 @@ class FortifyServiceProvider extends ServiceProvider
             return Limit::perMinute(5)->by($request->session()->get('login.id'));
         });
 
+        RateLimiter::for('forgot-password', function (Request $request) {
+            $key = Str::lower((string) $request->input('email')).'|'.$request->ip();
+
+            return [
+                Limit::perMinute(3)->by($key),
+                Limit::perHour(10)->by($key),
+            ];
+        });
+
+        RateLimiter::for('register', function (Request $request) {
+            $key = Str::lower((string) $request->input('email')).'|'.$request->ip();
+
+            return [
+                Limit::perMinute(3)->by($key),
+                Limit::perHour(10)->by($key),
+            ];
+        });
+
         Fortify::authenticateUsing(new LoginWithEmailOrUsername);
 //        Fortify::loginView(function () {
 //            return view('auth.login');

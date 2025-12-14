@@ -18,7 +18,9 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->trustProxies(at: '*');
         // global middlewares
+        $middleware->append(\App\Http\Middleware\ForceHttps::class);
         $middleware->append(\App\Http\Middleware\CheckBanned::class);
+        $middleware->append(\App\Http\Middleware\SecurityHeaders::class);
         $middleware->append(\Spatie\Csp\AddCspHeaders::class);
 
         $examGateMiddleware = class_exists(\Fakeeh\Assessments\Http\Middleware\ExamGate::class)
