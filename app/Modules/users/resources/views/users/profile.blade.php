@@ -12,6 +12,20 @@
 @endphp
 @extends('dashboard.mt.main')
 @section('content')
+    @php
+        $avatarUrl = isset($user) && $user->getMedia('avatar')->first()
+            ? $user->getMedia('avatar')->first()->getUrl()
+            : asset('assets/images/default-profile.png');
+    @endphp
+    <style nonce="{{ csp_nonce() }}">
+        .profile-avatar-preview {
+            background-image: url('{{ $avatarUrl }}');
+            background-size: cover;
+            background-position: center;
+            margin-bottom: 0.2rem;
+        }
+        .profile-avatar-upload-btn { margin-top: 0.5rem; }
+    </style>
 
     <div class="row">
         @if(session('updated'))
@@ -140,15 +154,12 @@
                             <div class="form-group">
                                 <div class="image-input image-input-outline" data-kt-image-input="true">
                                     <!-- Preview Image -->
-                                    <div class="image-input-wrapper w-125px h-125px" id="preview-container"
-                                         style="background-image:
-                                 url('{{ isset($user) && $user->getMedia('avatar')->first() ? $user->getMedia('avatar')->first()->getUrl() : asset('assets/images/default-profile.png') }}');
-                                  margin-bottom: 0.2rem">
+                                    <div class="image-input-wrapper w-125px h-125px profile-avatar-preview" id="preview-container">
                                     </div>
 
                                     <!-- Upload Button -->
-                                    <label class="btn btn-icon btn-active-color-primary bg-white shadow"
-                                           data-kt-image-input-action="change" style="margin-top: 0.5rem">
+                                    <label class="btn btn-icon btn-active-color-primary bg-white shadow profile-avatar-upload-btn"
+                                           data-kt-image-input-action="change">
                                         {{--                                <input type="file" name="avatar" id="image-upload" class="d-none" accept="image/*">--}}
                                         {!! html()->file('avatar')->class('d-none')->id("image-upload") !!}
                                         <span><img src="{{ asset('assets/icons/add.svg') }}" alt="Remove"
