@@ -38,12 +38,12 @@ class ImportUserMediaJob implements ShouldQueue
     public function handle()
     {
         $disk = 's3';
-        $emails = [];
+        $totals = ['processed' => 0, 'avatars' => 0, 'multi' => 0];
 
         $query = User::query();
         if (isset($this->companyId) && $this->companyId) {
             $query = $query->where('company_id', $this->companyId);
-        }else{
+        } else {
             $query->whereDoesntHave('media');
         }
         if (isset($this->fromId) && isset($this->toId)) {
@@ -53,7 +53,7 @@ class ImportUserMediaJob implements ShouldQueue
         } elseif (isset($this->toId)) {
             $query->where('id', '<=', $this->toId);
         }
-        $query->chunkById(100, function ($users) use (&$emails, $disk) {
+        $query->chunkById(100, function ($users) use (&$totals, $disk) {
 
             foreach ($users as $user) {
                 $test = 0;
@@ -91,21 +91,31 @@ class ImportUserMediaJob implements ShouldQueue
                 // fix update syntax: ['upload' => $test]
                 $user->update(['upload' => $test]);
 
-                $emails[] = "{$user->email} avatar={$avatar} multi={$multi} national_id={$national}";
+                $totals['processed']++;
+                $totals['avatars'] += $avatar;
+                $totals['multi'] += $multi;
             }
         });
 
-        // send summary email
+        // Send an aggregate summary to a configured recipient. Never email
+        // raw user identifiers (email/national_id) to a hard-coded address.
+        $recipient = config('media.import_report_recipient') ?: config('mail.from.address');
+        if (! $recipient) {
+            return;
+        }
+
         try {
             $mailService = new MailService(
                 subject: 'Media import report',
                 template: 'list_email',
-                data: ['emails' => $emails],
+                data: [
+                    'totals' => $totals,
+                    'emails' => [],
+                ],
             );
-            $mailService->sendMail('amr.yami1@gmail.com', false);
-
+            $mailService->sendMail($recipient, false);
         } catch (\Exception $exception) {
-            \Log::error("ImportUserMediaJob mail error: " . $exception->getMessage());
+            \Log::error('ImportUserMediaJob mail error: ' . $exception->getMessage());
         }
     }
 }

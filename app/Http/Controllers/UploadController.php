@@ -79,10 +79,19 @@ class UploadController extends BaseController
             }
         }
 
-        if ($request->user_id) {
+        $authUser = auth()->user();
+        if (! $authUser) {
+            abort(401);
+        }
+
+        if ($request->user_id && (int) $request->user_id !== (int) $authUser->id) {
+            // Acting on another user's media requires an admin role; otherwise IDOR.
+            if (! $authUser->hasRole(['CRM Admin', 'admin'])) {
+                abort(403, 'You may only upload media for your own account.');
+            }
             $user = $this->serviceShow->find($request->user_id, $request);
         } else {
-            $user = auth()->user();
+            $user = $authUser;
         }
         if ($user) {
             MediaFacade::mediafiles($request, $user);

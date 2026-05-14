@@ -1,16 +1,17 @@
 <?php
+
 namespace App\Enum;
 
-Enum DefaultValuesEnum
+enum DefaultValuesEnum: int
 {
-    const ACTIVE = 1;
-    const IN_ACTIVE = 0;
+    case ACTIVE = 1;
+    case IN_ACTIVE = 0;
 
     public static function getDefaultValuesOptions(): array
     {
         return [
-            self::ACTIVE => 'Active',
-            self::IN_ACTIVE => 'In Active',
+            self::ACTIVE->value => 'Active',
+            self::IN_ACTIVE->value => 'Inactive',
         ];
     }
 }

@@ -108,6 +108,7 @@ class RoleServiceStore extends Service implements ServiceStore
 
     public function restore(Request $request, $id = null)
     {
-        return $this->repo->restore($request, $id);
+        $role = $this->model->withTrashed()->findOrFail($id);
+        return $role->restore();
     }
 }

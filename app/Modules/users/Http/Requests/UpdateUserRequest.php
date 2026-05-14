@@ -7,6 +7,10 @@ use Users\Models\User;
 
 class UpdateUserRequest extends FormRequest
 {
+    public function authorize(): bool
+    {
+        return true;
+    }
 
     public function rules()
     {
@@ -18,7 +22,9 @@ class UpdateUserRequest extends FormRequest
 
         return [
             'email' => 'required|max:255|unique:users,email,'.$userId,
-            'mobile' => 'required|regex:/[0-9]{6,20}/|nullable',
+            // Anchor the regex so it can't match a substring of an
+            // arbitrary input. Mobile is required at update time.
+            'mobile' => 'required|regex:/^[0-9]{6,20}$/',
             'user_name' => 'required|max:255|unique:users,user_name,'.$userId,
         ];
     }

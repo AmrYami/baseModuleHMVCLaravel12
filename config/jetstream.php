@@ -60,10 +60,11 @@ return [
     'features' => [
         // Features::termsAndPrivacyPolicy(),
         // Features::profilePhotos(),
-        Features::api(),
+        // Passport handles mobile OAuth tokens; Jetstream's API UI expects Sanctum tokens.
+        // Features::api(),
         Features::teams(['invitations' => true]),
         Features::accountDeletion(),
-//        Features::,
+        //        Features::,
     ],
 
     /*

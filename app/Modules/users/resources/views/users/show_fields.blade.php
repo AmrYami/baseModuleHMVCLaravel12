@@ -19,5 +19,5 @@
 <!-- From Field -->
 <div class="form-group">
     {!! Form::label('freeze', 'Freeze:') !!}
-    <p>{{ $user->freeze == 1 ? 'Freezed' : 'Active' }}</p>
+    <p>{{ $user->freeze == 1 ? 'Frozen' : 'Active' }}</p>
 </div>

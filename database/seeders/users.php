@@ -2,61 +2,40 @@
 
 namespace Database\Seeders;
 
-use Users\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
+use Users\Models\User;
 
 class users extends Seeder
 {
     /**
      * Run the database seeds.
      *
+     * Seeds a single platform admin user. Real credentials must come from
+     * env vars; if SEED_ADMIN_PASSWORD is unset, a strong random password
+     * is generated and the admin must reset it via the standard
+     * forgot-password flow before logging in.
+     *
      * @return void
      */
     public function run()
     {
+        $password = env('SEED_ADMIN_PASSWORD') ?: Str::random(32);
+
         $data = [
             [
                 'name' => json_encode(['en' => 'admin', 'ar' => 'admin']),
-                'user_name' => 'admin',
-                'email' => 'admin@admin.com',
-                'mobile' => '01557011197',
-                'password'=> Hash::make('admin@admin.com'),
+                'user_name' => env('SEED_ADMIN_USERNAME', 'admin'),
+                'email' => env('SEED_ADMIN_EMAIL', 'admin@example.local'),
+                'mobile' => env('SEED_ADMIN_MOBILE', '00000000000'),
+                'password' => Hash::make($password),
                 'type' => 'crm admin',
                 'code' => uniqid(),
-                'status' => 1
-            ],
-            [
-                'name' => json_encode(['en' => 'HR', 'ar' => 'HR']),
-                'user_name' => 'HR',
-                'email' => 'hr@fakeeh.com',
-                'mobile' => '01011426275',
-                'password'=> Hash::make('hr@fakeeh.com'),
-                'type' => 'hr',
-                'code' => uniqid(),
-                'status' => 1
-            ],
-            [
-                'name' => json_encode(['en' => 'COO', 'ar' => 'COO']),
-                'user_name' => 'COO',
-                'email' => 'coo@fakeeh.com',
-                'mobile' => '01011426285',
-                'password'=> Hash::make('coo@fakeeh.com'),
-                'type' => 'coo',
-                'code' => uniqid(),
-                'status' => 1
-            ],
-            [
-                'name' => json_encode(['en' => 'Marketing', 'ar' => 'Marketing']),
-                'user_name' => 'Marketing',
-                'email' => 'marketing@fakeeh.com',
-                'mobile' => '01011426254',
-                'password'=> Hash::make('marketing@fakeeh.com'),
-                'type' => 'marketing',
-                'code' => uniqid(),
-                'status' => 1
+                'status' => 1,
             ],
         ];
+
         User::insert($data);
     }
 }

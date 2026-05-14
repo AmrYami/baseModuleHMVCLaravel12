@@ -1,8 +1,18 @@
 <?php
 
+use App\Http\Middleware\CheckBanned;
+use App\Http\Middleware\ForceHttps;
+use App\Http\Middleware\SecurityHeaders;
+use App\Providers\AliasServiceProvider;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Spatie\Csp\AddCspHeaders;
+use Spatie\Permission\Middleware\PermissionMiddleware;
+use Spatie\Permission\Middleware\RoleMiddleware;
+use Spatie\Permission\Middleware\RoleOrPermissionMiddleware;
+use Tymon\JWTAuth\Http\Middleware\Authenticate;
+use Tymon\JWTAuth\Http\Middleware\RefreshToken;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -12,31 +22,27 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withProviders([
-        \App\Providers\AliasServiceProvider::class,
+        AliasServiceProvider::class,
     ])
     ->withMiddleware(function (Middleware $middleware) {
 
-        $middleware->trustProxies(at: '*');
+        $trustedProxies = array_filter(array_map('trim', explode(',', (string) env('TRUSTED_PROXIES', '*'))));
+        $middleware->trustProxies(at: $trustedProxies ?: '*');
         // global middlewares
-        $middleware->append(\App\Http\Middleware\ForceHttps::class);
-        $middleware->append(\App\Http\Middleware\CheckBanned::class);
-        $middleware->append(\App\Http\Middleware\SecurityHeaders::class);
-        $middleware->append(\Spatie\Csp\AddCspHeaders::class);
-
-        $examGateMiddleware = class_exists(\Fakeeh\Assessments\Http\Middleware\ExamGate::class)
-            ? \Fakeeh\Assessments\Http\Middleware\ExamGate::class
-            : \App\Http\Middleware\BypassExamGate::class;
+        $middleware->append(ForceHttps::class);
+        $middleware->append(CheckBanned::class);
+        $middleware->append(SecurityHeaders::class);
+        $middleware->append(AddCspHeaders::class);
 
         $middleware->alias([
             // roles and permissions
-            'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
-            'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
-            'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
-//            'force.2fa', \App\Http\Middleware\ForceTwoFactorMiddleware::class,
-            //jwt auth
-            'jwt.auth' => \Tymon\JWTAuth\Http\Middleware\Authenticate::class,
-            'jwt.refresh' => \Tymon\JWTAuth\Http\Middleware\RefreshToken::class,
-            'exam.gate' => $examGateMiddleware,
+            'role' => RoleMiddleware::class,
+            'permission' => PermissionMiddleware::class,
+            'role_or_permission' => RoleOrPermissionMiddleware::class,
+            //            'force.2fa', \App\Http\Middleware\ForceTwoFactorMiddleware::class,
+            // jwt auth
+            'jwt.auth' => Authenticate::class,
+            'jwt.refresh' => RefreshToken::class,
         ]);
     })
 

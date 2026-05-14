@@ -2,27 +2,29 @@
 
 namespace App\Models;
 
-//use Illuminate\Contracts\Auth\MustVerifyEmail;
+// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Support\Concerns\UsesHashids;
+use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Jetstream\HasProfilePhoto;
 use Laravel\Jetstream\HasTeams;
-use Laravel\Sanctum\HasApiTokens;
-use Tymon\JWTAuth\Contracts\JWTSubject;
-use Users\Models\Role;
+use Laravel\Passport\HasApiTokens;
+use League\OAuth2\Server\Entities\ClientEntityInterface;
 use Spatie\Permission\Traits\HasRoles;
-use App\Support\Concerns\UsesHashids;
+use Tymon\JWTAuth\Contracts\JWTSubject;
 
 class User extends Authenticatable implements JWTSubject
 {
     use HasApiTokens;
 
-    /** @use HasFactory<\Database\Factories\UserFactory> */
+    /** @use HasFactory<UserFactory> */
     use HasFactory;
-    use HasRoles;
+
     use HasProfilePhoto;
+    use HasRoles;
     use HasTeams;
     use Notifiable;
     use TwoFactorAuthenticatable;
@@ -86,6 +88,7 @@ class User extends Authenticatable implements JWTSubject
     {
         if (is_array($value) || is_object($value)) {
             $this->attributes['name'] = json_encode($value);
+
             return;
         }
         $this->attributes['name'] = json_encode(['en' => (string) $value]);
@@ -97,6 +100,7 @@ class User extends Authenticatable implements JWTSubject
         if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
             return $decoded['en'] ?? reset($decoded) ?? '';
         }
+
         return $value;
     }
 
@@ -120,5 +124,35 @@ class User extends Authenticatable implements JWTSubject
         return [];
     }
 
+    /**
+     * Resolve Passport tokens for this legacy web user model through the
+     * configured mobile API provider. Both user models map to the users table.
+     */
+    public function getProviderName(): string
+    {
+        return (string) config('auth.guards.api.provider', 'users');
+    }
 
+    /**
+     * Resolve the user for Passport's Password Grant by email OR mobile.
+     *
+     * Madrasty users register with both `email` and `mobile` (both unique).
+     * The Flutter app posts whichever they prefer as the OAuth `username`,
+     * and Passport calls this method to look the user up.
+     *
+     * Mirror of the implementation on \Users\Models\User (which is the
+     * actual model used by the `api` Passport provider). Closure wrapping
+     * + nullable Client param are required for the same reasons noted there.
+     */
+    public function findForPassport(
+        string $username,
+        ?ClientEntityInterface $client = null,
+    ): ?self {
+        return static::query()
+            ->where(function ($q) use ($username): void {
+                $q->where('email', $username)
+                    ->orWhere('mobile', $username);
+            })
+            ->first();
+    }
 }

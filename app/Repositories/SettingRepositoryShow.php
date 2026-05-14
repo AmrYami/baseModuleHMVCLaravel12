@@ -34,13 +34,6 @@ class SettingRepositoryShow extends BaseRepositoryShow implements RepositoryShow
     }
 
     /**
-     * to get general statistics from settings table
-     * @return \Illuminate\Database\Eloquent\Builder[]|Collection
-     */
-    public function statisticsSettings(){
-        return $this->allQuery()->whereIn('key', Setting::$generalStatistics)->get();
-    }
-    /**
      * Return searchable fields
      *
      * @return array

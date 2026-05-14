@@ -7,29 +7,11 @@ use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
 class Kernel extends ConsoleKernel
 {
-    protected $commands = [
-        \App\Console\Commands\SendOverdueWorkflowReminders::class,
-    ];
+    protected $commands = [];
 
     protected function schedule(Schedule $schedule): void
     {
-        // Run overdue reminders every 15 minutes
-        $schedule->command('workflow:reminders:overdue')->everyFifteenMinutes();
-        // Nightly rebuild of answer usage aggregates
-        if (config('assessments.usage_aggregates_cron')) {
-            // Nightly incremental (last 24h)
-            $schedule->command('assessments:rebuild-answer-usage', [
-                '--since' => now()->subDay()->toDateString(),
-                '--chunk' => 1000,
-            ])->dailyAt('02:00')->withoutOverlapping();
-            // Weekly deep rebuild (full)
-            $schedule->command('assessments:rebuild-answer-usage', [
-                '--full' => true,
-                '--chunk' => 5000,
-            ])->sundays()->at('03:00')->withoutOverlapping();
-        }
-
-        // Security hygiene: prune expired Sanctum tokens and stale password reset tokens nightly
+        // Security hygiene: prune expired Sanctum tokens and stale password reset tokens nightly.
         $schedule->command('sanctum:prune-expired --hours=24')->dailyAt('01:15')->withoutOverlapping();
         $schedule->command('auth:clear-resets')->dailyAt('01:30')->withoutOverlapping();
     }

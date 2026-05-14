@@ -8,7 +8,9 @@ umask 022
 # You may uncomment the following lines if you want `ls' to be colorized:
 export SHELL
 export LS_OPTIONS='--color=auto'
-eval $(dircolors ~/dircolors-solarized/dircolors.256dark)
+if command -v dircolors >/dev/null 2>&1 && [ -f "$HOME/dircolors-solarized/dircolors.256dark" ]; then
+  eval "$(dircolors "$HOME/dircolors-solarized/dircolors.256dark")"
+fi
 alias ls='ls $LS_OPTIONS'
 alias ll='ls $LS_OPTIONS -l'
 alias l='ls $LS_OPTIONS -lA'

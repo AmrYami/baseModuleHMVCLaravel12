@@ -36,7 +36,7 @@ class MoreImplementation
      */
     public static function setWith(array $with): void
     {
-        array_push(self::$with, $with);
+        self::$with = array_merge(self::$with, $with);
     }
 
     /**
@@ -48,11 +48,11 @@ class MoreImplementation
     }
 
     /**
-     * @param array $with
+     * @param array $moreConditionsInFirstLevel
      */
     public static function setMoreConditionsInFirstLevel(array $moreConditionsInFirstLevel): void
     {
-        array_push(self::$moreConditionsInFirstLevel, $moreConditionsInFirstLevel);
+        self::$moreConditionsInFirstLevel = array_merge(self::$moreConditionsInFirstLevel, $moreConditionsInFirstLevel);
     }
 
     /**
@@ -68,7 +68,7 @@ class MoreImplementation
      */
     public static function setWithQuery(array $withQuery): void
     {
-        array_push(self::$withQuery, $withQuery);
+        self::$withQuery = array_merge(self::$withQuery, $withQuery);
     }
 
     /**
@@ -84,7 +84,7 @@ class MoreImplementation
      */
     public static function setOrWhere(array $orWhere): void
     {
-        array_push(self::$orWhere, $orWhere);
+        self::$orWhere = array_merge(self::$orWhere, $orWhere);
     }
 
     /**
@@ -100,7 +100,7 @@ class MoreImplementation
      */
     public static function setWhereIn(array $whereIn): void
     {
-        array_push(self::$whereIn, $whereIn);
+        self::$whereIn = array_merge(self::$whereIn, $whereIn);
     }
 
     /**
@@ -117,7 +117,7 @@ class MoreImplementation
      */
     public static function setWhereHas(array $whereHas): void
     {
-        array_push(self::$whereHas, $whereHas);
+        self::$whereHas = array_merge(self::$whereHas, $whereHas);
     }
 
     /**
@@ -128,14 +128,12 @@ class MoreImplementation
         return self::$whereDoesntHave;
     }
 
+
     /**
      * @param array $whereDoesntHave
      */
     public static function setWhereDoesntHave(array $whereDoesntHave): void
     {
-        array_push(self::$whereDoesntHave, $whereDoesntHave);
+        self::$whereDoesntHave = array_merge(self::$whereDoesntHave, $whereDoesntHave);
     }
-
-
-
 }

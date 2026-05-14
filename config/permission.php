@@ -27,7 +27,6 @@ return [
         'role' => Spatie\Permission\Models\Role::class,
 
         'user' => \Users\Models\User::class,
-        'doctor' => \Users\Models\Doctor::class,
 
     ],
 
@@ -175,8 +174,7 @@ return [
          * When permissions or roles are updated the cache is flushed automatically.
          */
 
-//        'expiration_time' => \DateInterval::createFromDateString('24 hours'),
-        'expiration_time' => 0,
+        'expiration_time' => \DateInterval::createFromDateString('24 hours'),
 
         /*
          * The cache key used to store all permissions.

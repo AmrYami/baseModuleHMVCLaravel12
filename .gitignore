@@ -1,24 +1,64 @@
+# Composer / Laravel
+/vendor
+!/vendor/.keep
+/bootstrap/cache/*
+!/bootstrap/cache/.gitkeep
 /.phpunit.cache
-/storage/*.key
-/storage/pail
 .phpunit.result.cache
+
+# Storage runtime (keep directory structure via per-subdir .gitignore;
+# only the contents are ignored — see storage/*/.gitignore)
+/storage/*.key
+/storage/oauth-private.key
+/storage/oauth-public.key
+/storage/pail
+/storage/debugbar
+/storage/clockwork
+
+# Logs / debug
+*.log
 npm-debug.log
 yarn-error.log
-/auth.json
+yarn-debug.log
+
+# Node / front-end build artifacts
+/node_modules
+/build
+/public/build
+/public/hot
+/public/storage
+
+# Environment files (NEVER commit)
+.env
+.env.backup
+.env.local
+.env.testing
+.env.production
+
+# IDE / OS
 /.fleet
 /.idea
 /.nova
 /.vscode
 /.zed
+.DS_Store
+Thumbs.db
+
+# Archives
 *.zip
 *.rar
-.env
-.env.backup
+*.tar.gz
+
+# Local-only configs
+/auth.json
 docker-compose.override.yml
 Homestead.json
 Homestead.yaml
 .docker/db/data
-/storage
 .git/config
-/vendor
-!/vendor/.keep
+
+# Passport keys (private; generated per environment)
+storage/oauth-private.key
+storage/oauth-public.key
+
+/node_modules

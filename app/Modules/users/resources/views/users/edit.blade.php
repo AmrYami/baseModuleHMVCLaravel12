@@ -3,16 +3,16 @@
     $breadcrumb = [
         [
             "title" => __('sidebar.Users'),
-            "url" => route('dashboard.users.create')
+            "url" => route('dashboard.users.index')
         ],
         [
-            "title" => __('sidebar.New User'),
+            "title" => __('users.Edit User'),
         ],
     ];
 @endphp
 @extends('dashboard.mt.main')
 @section('content')
-    <x-layout.mt.cards.basic :title="__('users.Create New User')">
+    <x-layout.mt.cards.basic :title="__('users.Edit User')">
         <x-slot:toolbar>
             <x-layout.mt.buttons.back :url='route("dashboard.users.index")'/>
         </x-slot:toolbar>

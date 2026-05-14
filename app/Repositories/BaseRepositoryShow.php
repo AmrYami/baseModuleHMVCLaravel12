@@ -352,6 +352,8 @@ class BaseRepositoryShow extends BaseRepository
         foreach ($values as $key => $value) {
             $q->whereBetween($key, [$value[0], $value[1]]);
         }
+
+        return $q;
     }
 
 

@@ -24,7 +24,7 @@ Route::namespace(buildControllerNamespace('Users'))->group(function () {//config
     ], function () {
         Route::middleware([
             'web',
-            'auth:doctor,web',
+            'auth',
             config('jetstream.auth_session'),
             'verified',
         ])->group(function () {
@@ -34,11 +34,11 @@ Route::namespace(buildControllerNamespace('Users'))->group(function () {//config
             //users
             Route::PUT('users/activate/{id}', [UsersController::class, 'activate'])->middleware('role_or_permission:approve-profile')->name('users.activate');
             Route::PUT('users/de_activate/{id}', [UsersController::class, 'deActivate'])->middleware('role_or_permission:approve-profile')->name('users.de_activate');
-            Route::PUT('users/un_freeze/{id}', [UsersController::class, 'un_freeze'])->name('users.un_freeze');
-            Route::put('users/update_password/{id}', [UsersController::class, 'update_password'])->name('users.update_password');
+            Route::PUT('users/un_freeze/{id}', [UsersController::class, 'un_freeze'])->middleware('role_or_permission:block-users')->name('users.un_freeze');
+            Route::put('users/update_password/{id}', [UsersController::class, 'update_password'])->middleware('role_or_permission:edit-users')->name('users.update_password');
             // Freeze flow: GET shows form, PUT applies
-            Route::get('users/freeze/{id}', [UsersController::class, 'freezeForm'])->name('users.freeze.form');
-            Route::PUT('users/freeze/{id}', [UsersController::class, 'freeze'])->name('users.freeze');
+            Route::get('users/freeze/{id}', [UsersController::class, 'freezeForm'])->middleware('role_or_permission:block-users')->name('users.freeze.form');
+            Route::PUT('users/freeze/{id}', [UsersController::class, 'freeze'])->middleware('role_or_permission:block-users')->name('users.freeze');
             Route::get('/users', [UsersController::class, 'index'])->middleware('role_or_permission:list-users')->name('users.index');
             Route::get('/users/create', [UsersController::class, 'create'])->middleware('role_or_permission:create-users')->name('users.create');
             Route::get('/users/{user}', [UsersController::class, 'show'])->middleware('role_or_permission:show-users')->name('users.show');

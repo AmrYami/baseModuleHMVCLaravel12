@@ -6,7 +6,7 @@
             "url" => route('dashboard.users.index')
         ],
         [
-            "title" => __('sidebar.New User'),
+            "title" => __('users.User Profile'),
         ],
     ];
 @endphp

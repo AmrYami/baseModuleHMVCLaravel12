@@ -4,10 +4,6 @@ namespace Database\Seeders;
 
 use App\Models\StoreSeedersImplemented;
 use App\Models\User;
-use Fakeeh\Assessments\Database\Seeders\AssessmentsCandidateDemoSeeder;
-use Fakeeh\Assessments\Database\Seeders\AssessmentsDemoSeeder;
-use Fakeeh\Assessments\Database\Seeders\AssessmentsPermissionSeeder;
-use Fakeeh\Assessments\Database\Seeders\AssessmentsRolePermissionAssignSeeder;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
@@ -27,23 +23,16 @@ class DatabaseSeeder extends Seeder
             __NAMESPACE__.'\\TeamsSeeder',
 
             __NAMESPACE__.'\\TopMGTPermissionsTableSeeder',
-            AssessmentsPermissionSeeder::class,
 
             __NAMESPACE__.'\\RolesTableSeeder',
             __NAMESPACE__.'\\UserRoleSeeder',
-            AssessmentsRolePermissionAssignSeeder::class,
 
             __NAMESPACE__.'\\addAttachFilesToUsersSeeder',
             __NAMESPACE__.'\\CountrySeeder',
             __NAMESPACE__.'\\LanguageSeeder',
-            __NAMESPACE__.'\\SpecialitiesSeeder',
             __NAMESPACE__.'\\RegistrationSettingSeeder',
             __NAMESPACE__.'\\NotificationSetting',
             __NAMESPACE__.'\\EmailVerifiedAtSeeder',
-
-            // Demo/fixtures
-            AssessmentsDemoSeeder::class,
-            AssessmentsCandidateDemoSeeder::class,
         ];
 
         // Run ordered seeders first (idempotent via seeders table)

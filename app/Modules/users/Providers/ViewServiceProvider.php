@@ -3,8 +3,6 @@
 namespace Users\Providers;
 use App\Models\CountryModel;
 use App\Models\LanguageModel;
-use App\Models\SpecialityModel;
-use Users\Models\CompanyModel;
 use Users\Models\Permissions;
 use Users\Models\Role;
 use Illuminate\Support\ServiceProvider;
@@ -43,7 +41,7 @@ class ViewServiceProvider extends ServiceProvider
             $view->with('allPermissions', $allPermissions);
         });
 
-        View::composer(['users::users.form_fields', 'users::users.role_field', 'users::users.create', 'users::users.edit'], function ($view) {
+        View::composer(['users::users.role_field', 'users::users.create', 'users::users.edit'], function ($view) {
             $countries = CountryModel::all()->mapWithKeys(function ($country) {
                 return [$country->key => $country->getTranslation('name', app()->getLocale())];
             });

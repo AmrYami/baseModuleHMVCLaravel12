@@ -45,6 +45,5 @@ return [
     'Do You Really Want To Un-Approve This User ... ?' => 'Do You Really Want To Un-Approve This User ... ?',
     'Filter' => 'Filter',
     'Filter Options' => 'Filter Options',
-    'Reset' => 'Reset',
     'Apply' => 'Apply',
 ];

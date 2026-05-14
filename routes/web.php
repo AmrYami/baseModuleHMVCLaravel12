@@ -21,35 +21,25 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-// Rejected landing (no sidebar) — must be accessible when gated
-Route::middleware(['auth:doctor,web', config('jetstream.auth_session'), 'verified'])
-    ->get('/rejected', function(){ return view('auth.rejected'); })
-    ->name('rejected');
-
 Route::middleware([
-    'auth:doctor,web',
+    'auth',
     config('jetstream.auth_session'),
     'verified',
-    'exam.gate',
 ])->group(function () {
 
+    Route::get('/dashboard', function () {
+        return view('dashboard.home');
+    })->name('dashboard');
 
-
-Route::get('/dashboard', function () {
-    return view('dashboard.home');
-})->name('dashboard');
-
-Route::group([
-    'prefix' => 'dashboard',
-    'as' => 'dashboard.'
-], function () {
-    // settings
-    Route::get('setting/{key}', [\App\Http\Controllers\SettingsController::class, 'edit'])->middleware('role_or_permission:setting-notifications')->name('setting.edit');
-    Route::post('setting/{key}', [\App\Http\Controllers\SettingsController::class, 'update'])->middleware('role_or_permission:setting-notifications')->name('setting.update');
-    Route::post('setting/{key}/test', [\App\Http\Controllers\SettingsController::class, 'sendTest'])->middleware('role_or_permission:setting-notifications')->name('setting.test');
-
-
-});
+    Route::group([
+        'prefix' => 'dashboard',
+        'as' => 'dashboard.',
+    ], function () {
+        // settings
+        Route::get('setting/{key}', [\App\Http\Controllers\SettingsController::class, 'edit'])->middleware('role_or_permission:setting-notifications')->name('setting.edit');
+        Route::post('setting/{key}', [\App\Http\Controllers\SettingsController::class, 'update'])->middleware('role_or_permission:setting-notifications')->name('setting.update');
+        Route::post('setting/{key}/test', [\App\Http\Controllers\SettingsController::class, 'sendTest'])->middleware('role_or_permission:setting-notifications')->name('setting.test');
+    });
 });
 
 Route::get('/two-factor-challenge', [\App\Http\Controllers\Auth\CustomTwoFactorChallengeController::class, 'create'])

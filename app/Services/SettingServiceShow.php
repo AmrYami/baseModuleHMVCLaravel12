@@ -17,16 +17,16 @@ class SettingServiceShow implements ServiceShow
 
     public function find_by(Request $request): object
     {
-        $users = $this->repo->find_by($request->all());
-        return $users;
+        $settings = $this->repo->find_by($request->all());
+
+        return $settings;
     }
 
     public function find($id, Request $request): object
     {
-            $user = $this->repo->find($id);
-            return $user;
+        unset($request);
+        $setting = $this->repo->find($id);
+
+        return $setting;
     }
-
-    
-
 }

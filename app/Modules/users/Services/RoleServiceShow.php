@@ -39,13 +39,12 @@ class RoleServiceShow implements ServiceShow
      *
      * @param Int $id
      */
-    public function find($id, Request $request): object
+    public function find($id, Request $request): ?object
     {
         try {
-            $Role = $this->repo->find($id);
-            return $Role;
+            return $this->repo->find($id);
         } catch (\Exception $exception) {
-            return false;
+            return null;
         }
     }
 

@@ -17,7 +17,7 @@ class CreateNotificationsTable extends Migration
             $table->id();
             $table->bigInteger('notify_id')->nullable();
             $table->enum('notify_type', ['comments', 'users'])->nullable();
-            $table->enum('seen', ['0', '1'])->comment('0 == not seen | 1 == seen');
+            $table->boolean('seen')->default(false)->comment('false == not seen | true == seen');
             $table->unsignedInteger('created_by')->nullable();
             $table->unsignedBigInteger('user_id')->nullable();
             $table->string('type', 20)->nullable();

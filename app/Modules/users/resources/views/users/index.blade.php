@@ -93,8 +93,14 @@
                             const hid = row.hashid || row.id;
                             let url = "{{ route('dashboard.users.edit_profile', ['user' => "%id%"]) }}";
                             url = url.replace('%id%', hid);
+                            const safeText = String(data ?? '')
+                                .replace(/&/g, '&amp;')
+                                .replace(/</g, '&lt;')
+                                .replace(/>/g, '&gt;')
+                                .replace(/"/g, '&quot;')
+                                .replace(/'/g, '&#39;');
 
-                            return `<a href="${url}">${data}</a>`;
+                            return `<a href="${url}">${safeText}</a>`;
                         }
                     },
                     {
@@ -110,7 +116,7 @@
 
                             const now = new Date();
                             if (parseInt(row.freeze) || (row.banned_until && new Date(row.banned_until) > now)) {
-                                html += `<div class=\"text-danger small mt-1\">{{ __('Freezed') }}</div>`;
+                                html += `<div class=\"text-danger small mt-1\">{{ __('messages.Frozen') }}</div>`;
                             }
                             return html;
                         }

@@ -2,41 +2,38 @@
 
 namespace Users\Http\Controllers;
 
-use Users\Http\Requests\UpdateUserProfileAwardRequest;
-use Users\Models\Topic;
+use App\Http\Controllers\BaseController;
 use App\Services\ActivityLogServiceShow;
 use Illuminate\Contracts\Support\Renderable;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
+use Illuminate\Foundation\Application;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Users\Http\Requests\CreateUserRequest;
 use Users\Http\Requests\UpdateUserPasswordRequest;
-use Users\Http\Requests\UpdateUserRequest;
 use Users\Http\Requests\UpdateUserProfileRequest;
-use App\Http\Controllers\BaseController;
-use Illuminate\Http\Request;
+use Users\Http\Requests\UpdateUserRequest;
+use Users\Http\Resources\UserResource;
 use Users\Models\User;
 use Users\Services\UserServiceShow;
 use Users\Services\UserServiceStore;
 
 class UsersController extends BaseController
 {
-
     public function __construct(
-        protected UserServiceShow        $serviceShow,
-        protected UserServiceStore       $userServiceStore,
+        protected UserServiceShow $serviceShow,
+        protected UserServiceStore $userServiceStore,
         protected ActivityLogServiceShow $activityLogServiceShow
-    )
-    {
-    }
+    ) {}
 
     /**
      * Display a listing of the user.
-     *
-     * @param Request $request
-     *
-     * @return Renderable
      */
     public function index(Request $request): Renderable
     {
         $users = $this->serviceShow->find_by($request, 10);
+
         return view('users::users.index')
             ->with('users', $users)
             ->with('action', 'users');
@@ -44,29 +41,12 @@ class UsersController extends BaseController
 
     public function list(Request $request)
     {
-        $users = $this->serviceShow->dataTable($request, \Users\Http\Resources\UserResource::class);
+        $users = $this->serviceShow->dataTable($request, UserResource::class);
         $data = $users['data'];
         unset($users['data']);
-        return jsonMessage(data: $data, extra: $users );
+
+        return jsonMessage(data: $data, extra: $users);
     }
-
-
-    /**
-     * Display a listing of the paramedics.
-     *
-     * @param Request $request
-     *
-     * @return Renderable
-     */
-    public function paramedics(Request $request): Renderable
-    {
-        $request->merge(['speciality_experience' => 'yes']);
-        $users = $this->serviceShow->find_by($request);
-        return view('users::users.paramedics')
-            ->with('users', $users)
-            ->with('action', 'users');
-    }
-
 
     /**
      * Show the form for creating a new user.
@@ -98,33 +78,17 @@ class UsersController extends BaseController
             0 => 'pending',
             1 => 'active',
         ];
+
         return view('users::company_users.create', [
             'status' => $status,
             'hasCompany' => true,
-            'action' => 'create'
-        ]);
-    }
-
-    /**
-     * Show the form for creating a new user.
-     *
-     * @return Renderable
-     */
-    public function createForm($id, Request $request)
-    {
-        $user = $this->serviceShow->find($id, $request);
-
-        $Topic = Topic::where('active', true)->orderBy('order')->get();
-        return view('users::users.show_form')->with([
-            'topics' => $Topic ?? '',
-            'user' => $user ?? [],
+            'action' => 'create',
         ]);
     }
 
     /**
      * Store a newly created user in storage.
      *
-     * @param CreateUserRequest $request
      *
      * @return object
      */
@@ -132,8 +96,9 @@ class UsersController extends BaseController
     {
         try {
             $user = $this->userServiceStore->save($request);
-            if ($fromFortiFy)
+            if ($fromFortiFy) {
                 return $user;
+            }
             if ($user) {
                 return redirect()->route('dashboard.users.index')->with('created', __('messages.Created', ['thing' => 'User']));
             } else {
@@ -143,6 +108,7 @@ class UsersController extends BaseController
             if ($fromFortiFy) {
                 throw $exception;
             }
+
             return back()->withErrors(__('common.Sorry But there Was an issue in saving Data please try again'));
         }
     }
@@ -155,8 +121,9 @@ class UsersController extends BaseController
                 'created_by' => auth()->user()->id,
             ]);
             $user = $this->userServiceStore->save($request);
-            if ($fromFortiFy)
+            if ($fromFortiFy) {
                 return $user;
+            }
             if ($user) {
                 return redirect()->route('dashboard.users.edit_profile', $user->id)->with('created', __('messages.Created', ['thing' => 'User']));
             } else {
@@ -170,27 +137,24 @@ class UsersController extends BaseController
     /**
      * Display the user.
      *
-     * @param int $id
      *
      * @return object
      */
-    public function show(int $id): object
+    public function show(int $id)
     {
         $user = $this->serviceShow->find($id);
         if (empty($user)) {
-            Flash::error('User not found');
-
-            return redirect(route('dashboard.users.index'));
+            return redirect(route('dashboard.users.index'))
+                ->withErrors(['user' => 'User not found']);
         }
+
         return view('users::users.show')->with('user', $user);
     }
 
     /**
      * Show the form for editing the user.
      *
-     * @param int $id
-     *
-     * @return Renderable
+     * @param  int  $id
      */
     public function edit($id, Request $request): Renderable
     {
@@ -200,6 +164,7 @@ class UsersController extends BaseController
         ];
         $user = $this->serviceShow->find($id, $request);
         $selectedRoleId = $user->roles->first()?->id;
+
         return view('users::users.edit', [
             'user' => $user,
             'status' => $status,
@@ -209,58 +174,16 @@ class UsersController extends BaseController
         ]);
     }
 
-    public function activitiesDoctor($id, Request $request)
-    {
-        $activities = [];
-        $request->merge(['request_to' => auth()->user()->id]);
-        $doctor = $this->serviceShow->find($id, $request);
-        $HRList = $this->serviceShow->listUsersHasRole('HR');
-        $marketingList = $this->serviceShow->listUsersHasRole('Marketing');
-        $approvalUsers = $this->serviceShow->listUsersHasPemission('approve-profile');
-//        $cycleRequests = $this->requestServiceShow->find_by($request);
-//        $myRequests = $this->requestServiceShow->myRequests($request);
-
-        if ($doctor) {
-            $request->merge([
-                'subject_type' => User::class,
-                'subject_id' => $id
-            ]);
-            $activities = $this->activityLogServiceShow->find_by($request);
-        }
-        $fields = array_diff($doctor->getFillable(), [
-            'password',
-            'remember_token',
-            'two_factor_secret',
-            'two_factor_recovery_codes',
-            'profile_photo_path',
-            'current_team_id',
-            'freeze',
-            'type',
-            'code',
-            'banned_until',
-            'two_factor_confirmed_at',
-        ]);
-
-
-        $translatable = $doctor->getTranslatableAttributes();
-
-        return view('users::users.show_doctor',
-            compact('doctor', 'activities', 'fields', 'translatable', 'HRList', 'marketingList', 'approvalUsers'));
-    }
-
     /**
      * Update the specified user in storage.
      *
-     * @param int $id
-     * @param UpdateUserRequest $request
-     *
-     * @return object|bool
+     * @param  int  $id
      */
     public function update($id, UpdateUserRequest $request): object|bool
     {
-//        try {
+        //        try {
         $request->merge([
-            'type' => 'user'
+            'type' => 'user',
         ]);
 
         $user = $this->userServiceStore->update($id, $request);
@@ -271,24 +194,23 @@ class UsersController extends BaseController
         }
 
         return back()->withErrors(__('common.Sorry But there Was an issue in saving Data please try again'));
-//        } catch (\Exception $exception) {
-//            return false;
-//        }
+        //        } catch (\Exception $exception) {
+        //            return false;
+        //        }
 
     }
 
     /**
      * Update the specified user.
      *
-     * @param int $id
-     * @param UpdateUserRequest $request
-     *
-     * @return object|bool
+     * @param  int  $id
+     * @param  UpdateUserRequest  $request
      */
-    public function updateUser($id, Request $request): object|bool
+    public function updateUser($id, UpdateUserProfileRequest $request): object|bool
     {
-        if (!$id)
+        if (! $id) {
             $id = auth()->user()->id;
+        }
         try {
             $request->merge([
                 'type' => 'user',
@@ -306,15 +228,15 @@ class UsersController extends BaseController
                 return back()->withErrors(__('common.Sorry But there Was an issue in saving Data please try again'));
             }
         } catch (\Exception $exception) {
-            return false;
+            report($exception);
+
+            return back()->withErrors(__('common.Sorry But there Was an issue in saving Data please try again'));
         }
 
     }
 
     /**
-     * @param $id
-     * @param UpdateUserPasswordRequest $request
-     * @return \Illuminate\Http\RedirectResponse
+     * @return RedirectResponse
      */
     public function update_password($id, UpdateUserPasswordRequest $request)
     {
@@ -330,16 +252,16 @@ class UsersController extends BaseController
     /**
      * Remove the specified user.
      *
-     * @param int $id
-     *
+     * @param  int  $id
      * @return Response
-     * @throws \Exception
      *
+     * @throws \Exception
      */
     public function destroy(Request $request, $id)
     {
-        if ($id == 1)
+        if ($id == 1) {
             return back()->withErrors(__('common.You cant delete this user'));
+        }
         $delete = $this->userServiceStore->delete($request, $id);
         if ($delete) {
             return redirect()->back()->with('deleted', __('messages.Deleted', ['thing' => 'User']));
@@ -351,14 +273,12 @@ class UsersController extends BaseController
     /**
      * Update user's profile.
      *
-     * @param int $id
-     * @param UpdateUserProfileRequest $request
-     *
+     * @param  int  $id
      * @return Response
      */
     public function updateMyProfile($id, UpdateUserProfileRequest $request)
     {
-        $user = $this->userServiceStore->update($id, $request);
+        $user = $this->userServiceStore->updateUser($id, $request);
         if ($user) {
             return redirect()->back()->with('updated', __('messages.Updated', ['thing' => 'Your Profile']));
         } else {
@@ -366,24 +286,23 @@ class UsersController extends BaseController
         }
     }
 
-
     /**
-     * @param Request $request
-     * @return \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Illuminate\Foundation\Application|object
+     * @return Factory|View|Application|object
      */
     public function myProfile(Request $request)
     {
         $fields = [];
         $translatable = [];
-//        if (auth()->user()->hasRole('Doctor')) {
-//            $user = $this->doctorServiceShow->find(auth()->user()->id, $request);
-//        } else {
+        //        if (auth()->user()->hasRole('Doctor')) {
+        //            $user = $this->doctorServiceShow->find(auth()->user()->id, $request);
+        //        } else {
         $user = $this->serviceShow->find(auth()->user()->id, $request);
-//        }
+        //        }
         $status = [
             0 => 'pending',
             1 => 'active',
         ];
+
         return view('users::users.profile', [
             'action' => 'my profile',
             'status' => $status,
@@ -396,18 +315,18 @@ class UsersController extends BaseController
     /**
      * Freeze user.
      *
-     * @param int $id
-     *
+     * @param  int  $id
      * @return Response
-     * @throws \Exception
      *
+     * @throws \Exception
      */
     public function freeze(Request $request, $id)
     {
         $res = $this->userServiceStore->freeze($request, $id);
         if ($res) {
-            return redirect()->route('dashboard.users.index')->with('deleted', __('messages.Freezed', ['thing' => 'User']));
+            return redirect()->route('dashboard.users.index')->with('deleted', __('messages.Frozen', ['thing' => 'User']));
         }
+
         return back()->withErrors(__('common.Sorry But there Was an issue in saving Data please try again'));
     }
 
@@ -417,7 +336,8 @@ class UsersController extends BaseController
     public function freezeForm($id, Request $request)
     {
         $user = $this->serviceShow->find($id, $request);
-        abort_if(!$user, 404);
+        abort_if(! $user, 404);
+
         return view('users::users.freeze_form', [
             'user' => $user,
         ]);
@@ -426,16 +346,15 @@ class UsersController extends BaseController
     /**
      * activate user.
      *
-     * @param int $id
+     * @param  int  $id
      *
      * @throws \Exception
-     *
      */
     public function activate(Request $request, $id)
     {
         $activate = $this->userServiceStore->activate($request, $id);
         if ($activate) {
-            return redirect()->back()->with(__('messages.activate', ['thing' => 'User']));
+            return redirect()->back()->with('success', __('messages.activate', ['thing' => 'User']));
         } else {
             return back()->withErrors(__('common.Sorry But there Was an issue in saving Data please try again'));
         }
@@ -444,16 +363,15 @@ class UsersController extends BaseController
     /**
      * approve user.
      *
-     * @param int $id
+     * @param  int  $id
      *
      * @throws \Exception
-     *
      */
     public function approve(Request $request, $id)
     {
         $activate = $this->userServiceStore->approve($request, $id);
         if ($activate) {
-            return redirect()->back()->with(__('messages.approve', ['thing' => 'User']));
+            return redirect()->back()->with('success', __('messages.approve', ['thing' => 'User']));
         } else {
             return back()->withErrors(__('common.Sorry But there Was an issue in saving Data please try again'));
         }
@@ -462,16 +380,15 @@ class UsersController extends BaseController
     /**
      * de activate user.
      *
-     * @param int $id
+     * @param  int  $id
      *
      * @throws \Exception
-     *
      */
     public function deActivate(Request $request, $id)
     {
         $activate = $this->userServiceStore->deActivate($request, $id);
         if ($activate) {
-            return redirect()->back()->with(__('messages.activate', ['thing' => 'User']));
+            return redirect()->back()->with('success', __('messages.deactivate', ['thing' => 'User']));
         } else {
             return back()->withErrors(__('common.Sorry But there Was an issue in saving Data please try again'));
         }
@@ -480,40 +397,32 @@ class UsersController extends BaseController
     /**
      * unApprove user.
      *
-     * @param int $id
+     * @param  int  $id
      *
      * @throws \Exception
-     *
      */
     public function unApprove(Request $request, $id)
     {
         $unApprove = $this->userServiceStore->unApprove($request, $id);
         if ($unApprove) {
-            return redirect()->back()->with(__('messages.unApprove', ['thing' => 'User']));
+            return redirect()->back()->with('success', __('messages.unApprove', ['thing' => 'User']));
         } else {
             return back()->withErrors(__('common.Sorry But there Was an issue in saving Data please try again'));
         }
     }
 
     /**
-     * @param Request $request
-     * @param $id
-     * @return \Illuminate\Http\RedirectResponse
+     * @return RedirectResponse
      */
     public function un_freeze(Request $request, $id)
     {
         $delete = $this->userServiceStore->un_freeze($request, $id);
         if ($delete) {
-            return redirect()->back()->with('deleted', __('messages.Un-Freezed', ['thing' => 'User']));
+            return redirect()->back()->with('deleted', __('messages.Unfrozen', ['thing' => 'User']));
         } else {
             return back()->withErrors(__('common.Sorry But there Was an issue in saving Data please try again'));
         }
     }
 
-    public function requestDoctorToCompleteProfile()
-    {
-
-    }
-
-
+    public function requestDoctorToCompleteProfile() {}
 }

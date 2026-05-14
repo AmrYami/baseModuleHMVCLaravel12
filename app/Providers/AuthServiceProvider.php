@@ -4,8 +4,10 @@ namespace App\Providers;
 
 use App\Models\Team;
 use App\Policies\TeamPolicy;
+use DateInterval;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Gate;
+use Laravel\Passport\Passport;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -22,13 +24,16 @@ class AuthServiceProvider extends ServiceProvider
 
     /**
      * Register any authentication / authorization services.
-     *
-     * @return void
      */
-    public function boot()
+    public function boot(): void
     {
         $this->registerPolicies();
-        //make CRM Admin has no any restrictions
+
+        Passport::tokensExpireIn(new DateInterval('P1Y'));
+        Passport::personalAccessTokensExpireIn(new DateInterval('P1Y'));
+        Passport::refreshTokensExpireIn(new DateInterval('P2Y'));
+
+        // make CRM Admin has no any restrictions
         Gate::before(function ($user, $ability) {
             return $user->hasRole('CRM Admin') ? true : null;
         });

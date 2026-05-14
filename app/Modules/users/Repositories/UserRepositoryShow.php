@@ -98,10 +98,15 @@ class UserRepositoryShow extends BaseRepositoryShow implements RepositoryShow, B
             $query->whereIn('speciality', $search['speciality']);
         }
         if (isset($search['first_name'])) {
-            $query->where(function ($q) use ($search) {
-                $q->where('first_name', $search['first_name'][0], '%' . $search['first_name'][1] . '%')
-                    ->orWhere('second_name', $search['second_name'][0], '%' . $search['second_name'][1] . '%')
-                    ->orWhere('last_name', $search['last_name'][0], '%' . $search['last_name'][1] . '%');
+            // Use a hardcoded LIKE operator: never accept a SQL operator from request input.
+            $firstName = is_array($search['first_name']) ? ($search['first_name'][1] ?? '') : $search['first_name'];
+            $secondName = is_array($search['second_name'] ?? null) ? ($search['second_name'][1] ?? '') : ($search['second_name'] ?? '');
+            $lastName = is_array($search['last_name'] ?? null) ? ($search['last_name'][1] ?? '') : ($search['last_name'] ?? '');
+
+            $query->where(function ($q) use ($firstName, $secondName, $lastName) {
+                $q->where('first_name', 'like', '%' . $firstName . '%')
+                    ->orWhere('second_name', 'like', '%' . $secondName . '%')
+                    ->orWhere('last_name', 'like', '%' . $lastName . '%');
             });
         }
         if (isset($search['approve'])) {
@@ -164,56 +169,6 @@ class UserRepositoryShow extends BaseRepositoryShow implements RepositoryShow, B
             return $query->get();
         }
     }
-
-    public function listParamedics($search, $role, $perPage = 50, $export = false)
-    {
-        $query = $this->model->query();
-        if (isset($search['speciality']) && $search['speciality']) {
-            $query->whereIn('speciality', $search['speciality']);
-        } else {
-            $query->whereNotNull('speciality');
-        }
-        if (isset($search['first_name'])) {
-            $query->where(function ($q) use ($search) {
-                $q->where('first_name', $search['first_name'][0], '%' . $search['first_name'][1] . '%')
-                    ->orWhere('second_name', $search['second_name'][0], '%' . $search['second_name'][1] . '%')
-                    ->orWhere('last_name', $search['last_name'][0], '%' . $search['last_name'][1] . '%');
-            });
-        }
-        if (isset($search['approve'])) {
-            $query->where('approve', $search['approve']);
-        }
-        if (isset($search['email'])) {
-            $query->where('email', 'like', '%' . $search['email'] . '%');
-        }
-        if (isset($search['mobile'])) {
-            $query->where('mobile', 'like', '%' . $search['mobile'] . '%');
-        }
-        if (isset($search['company_id']) && $search['company_id']) {
-            $query = $query->where('company_id', $search['company_id']);
-        }
-        if (isset($search['from'])  && isset($search['to'])) {
-            $query->whereBetween('id', [$search['from'], $search['to']]);
-        } elseif (isset($search['from'])) {
-            $query->where('id', '>=', $search['from']);
-        } elseif (isset($search['to'])) {
-            $query->where('id', '<=', $search['to']);
-        }
-
-
-
-//        $query = $this->allQuery($search);
-        $query->with('statuses');
-        $query->with('company');
-        $query->role($role);
-
-        if ($export) {
-            return $query->get();
-        } else {
-            return $query->paginate($perPage);
-        }
-    }
-
 
     public function listUsersHasRole($role)
     {

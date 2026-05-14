@@ -12,14 +12,13 @@ class NotificationSetting extends Seeder
      */
     public function run(): void
     {
-        $data = [
-                'key' => 'notifications',
-                'value' =>  json_encode([
-                    'approval_profile' => "on",
-                    'new_account' => "on",
-                    'notifiers' => "on",
-                ]),
-        ];
-        SettingModel::insert($data);
+        SettingModel::updateOrCreate(
+            ['key' => 'notifications'],
+            ['value' => json_encode([
+                'approval_profile' => 'on',
+                'new_account' => 'on',
+                'notifiers' => 'on',
+            ])]
+        );
     }
 }

@@ -4,10 +4,10 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Pages Language Lines
+    | Notification Language Lines
     |--------------------------------------------------------------------------
     |
-    | for pages names
+    | Localization strings for notifications
     |
     */
 
@@ -15,5 +15,6 @@ return [
     'newItemNotificationBody' => 'You have a new item',
     'newClientNotificationTitle' => 'New Client',
     'newClientNotificationBody' => 'There\'s a new registered user',
-    'tempExitNotificationBody' => 'Temp Exit',
+    'tempExitNotificationTitle' => 'Temporary Exit',
+    'tempExitNotificationBody' => 'A temporary exit has been recorded',
 ];

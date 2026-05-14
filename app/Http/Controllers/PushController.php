@@ -31,24 +31,25 @@ class PushController extends Controller
         $user = Auth::user();
 
         $res = $user->updatePushSubscription($endpoint, $key, $token);
-        return $res;
+
         return response()->json(['success' => true, 'data' => $res], 200);
     }
 
 
     /**
-     * Send Push Notifications to all users.
+     * Send Push Notifications to the authenticated user.
      *
      * @return \Illuminate\Http\Response
      */
     public function push(Request $request)
     {
-//        dd($request->all(), $id);
         $webPushNotification = new WebPushNotification($request);
-//        return $webPushNotification;
-        $user = \Users\Models\User::find(1);
-//        if ($user)
-            $res = $user->notify($webPushNotification);
+        $user = $request->user();
+        if (! $user) {
+            abort(401);
+        }
+        $res = $user->notify($webPushNotification);
+
         return response()->json(['success' => true, 'data' => $user, 'res' => $res], 200);
     }
 

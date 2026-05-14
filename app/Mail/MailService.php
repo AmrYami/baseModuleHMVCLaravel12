@@ -2,19 +2,29 @@
 
 namespace App\Mail;
 
-use AllowDynamicProperties;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
-#[AllowDynamicProperties] class MailService extends Mailable
+class MailService extends Mailable
 {
     use Queueable, SerializesModels;
 
+    protected ?string $template;
+
+    protected mixed $data;
+
+    protected bool $isMarkDown;
+
     /**
      * Create a new message instance.
+     *
+     * Use Laravel's `$this->from(address, name)` so the framework actually
+     * sets the From: header (assigning to dynamic $this->fromAddress would
+     * not). Pull defaults from config(), not env(), to stay correct after
+     * `php artisan config:cache`.
      */
     public function __construct(
         $from = null,
@@ -22,14 +32,14 @@ use Illuminate\Support\Facades\Mail;
         $template = null,
         $data = null,
         bool|int $isMarkDown = false
-    )
-    {
-        $this->fromAddress = $from ?? env('MAIL_FROM_ADDRESS', 'no-reply@example.com');
-        $this->fromName = env('MAIL_FROM_NAME', 'No Reply');
+    ) {
+        $fromAddress = $from ?? config('mail.from.address', 'no-reply@example.com');
+        $fromName = config('mail.from.name', config('app.name', 'No Reply'));
+        $this->from($fromAddress, $fromName);
         $this->subject = $subject;
         $this->template = $template;
         $this->data = $data;
-        $this->isMarkDown = $isMarkDown;
+        $this->isMarkDown = (bool) $isMarkDown;
     }
 
     /**
@@ -37,37 +47,36 @@ use Illuminate\Support\Facades\Mail;
      */
     public function build()
     {
-        if($this->isMarkDown){
+        if ($this->isMarkDown) {
             return $this->subject($this->subject)
-                ->markdown('emails.' . $this->template)
+                ->markdown('emails.'.$this->template)
                 ->with(['data' => $this->data]);
         }
+
         return $this->subject($this->subject)
-            ->view('emails.' . $this->template)
+            ->view('emails.'.$this->template)
             ->with(['data' => $this->data]);
     }
 
     /**
      * Send the email.
      */
-    public function sendMail($to, $queue = false)
+    public function sendMail($to, $queue = false): bool
     {
         try {
-
             if ($queue) {
-                Mail::to($to)->queue($this->build());
+                Mail::to($to)->queue($this);
             } else {
-//                Mail::send($this->build());
                 Mail::to([$to])->send($this);
             }
 
-            Log::info('Email sent successfully', ['to' => $this->to, 'subject' => $this->subject]);
+            Log::info('Email sent successfully', ['to' => $to, 'subject' => $this->subject]);
 
-            return response()->json(['message' => 'Email sent successfully']);
+            return true;
         } catch (\Throwable $e) {
             Log::error('Email sending failed', ['error' => $e->getMessage()]);
 
-            return response()->json(['error' => 'Failed to send email'], 500);
+            return false;
         }
     }
 }

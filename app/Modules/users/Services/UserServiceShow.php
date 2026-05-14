@@ -10,7 +10,6 @@ use App\Helpers\MoreImplementation;
 use Illuminate\Support\Facades\Storage;
 use Users\Repositories\UserRepositoryShow;
 use Illuminate\Database\Eloquent\Collection;
-use App\Repositories\SpecialityRepositoryShow;
 
 class UserServiceShow implements ServiceShow
 {
@@ -25,10 +24,9 @@ class UserServiceShow implements ServiceShow
      * @param UserRepository $repository
      * @return void
      */
-    public function __construct(UserRepositoryShow $repository, SpecialityRepositoryShow $specialityRepositoryShow)
+    public function __construct(UserRepositoryShow $repository)
     {
         $this->repo = $repository;
-        $this->specialityRepositoryShow = $specialityRepositoryShow;
     }
 
     
@@ -182,54 +180,6 @@ class UserServiceShow implements ServiceShow
 
 
         $users = $this->repo->listUsers($filter, "User", $perPage, $export);
-        return $users;
-    }
-
-    public function listSpecialities()
-    {
-        return $this->specialityRepositoryShow->all();
-    }
-
-    public function listParamedics(Request $request, int $perPage = 50, $export = false): object
-    {
-        $filter = array_filter($request->except('approve'));
-        if (isset($request->name) && $request->name) {
-            $name = $request->name;
-            $request->merge([
-                'first_name' => ['like', '%' . $request->name . '%'],
-                'second_name' => ['like', '%' . $request->name . '%'],
-                'last_name' => ['like', '%' . $request->name . '%'],
-            ]);
-            $request->offsetUnset('name');
-            $filter = array_filter($request->except('approve'));
-
-        }
-        if ($request->approve)
-            $filter['approve'] = $request->approve;
-
-        $users = $this->repo->listParamedics($filter, "User", $perPage, $export);
-
-        $request->merge(['name' => $name ?? null]);
-        return $users;
-    }
-
-    /**
-     * Use Search Criteria from request to find from Repository
-     *
-     * @param Request $request
-     * @return Collection
-     */
-
-    public function listDoctors(Request $request): object
-    {
-        MoreImplementation::setWhereHas([
-            'roles' => [
-                'where' => [
-                    'name' => 'doctor',
-                ]
-            ]
-        ]);
-        $users = $this->repo->find_by($request->all());
         return $users;
     }
 

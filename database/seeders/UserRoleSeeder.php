@@ -2,13 +2,9 @@
 
 namespace Database\Seeders;
 
-use App\Models\Team;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Schema;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
-use Spatie\Permission\PermissionRegistrar;
-use Users\Models\User;
 
 class UserRoleSeeder extends Seeder
 {
@@ -19,14 +15,16 @@ class UserRoleSeeder extends Seeder
         $user = Role::firstOrCreate(['name' => 'User', 'guard_name' => 'web']);
 
         // ✅ Ensure permissions exist before assigning
-        $permissions = Permission::all();
-        if ($permissions->isNotEmpty()) {
-            $userPermissions = $permissions;
-            $user->syncPermissions($userPermissions->whereIn('name', [
+        $userPermissions = Permission::query()
+            ->where('guard_name', 'web')
+            ->whereIn('name', [
                 'dashboard',
-                'complete-form',
-                'complete-owen-profile'
-            ])->where('guard_name', 'web'));
+                'complete-own-profile',
+            ])
+            ->get();
+
+        if ($userPermissions->isNotEmpty()) {
+            $user->syncPermissions($userPermissions);
         }
 
     }

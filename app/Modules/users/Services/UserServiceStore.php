@@ -2,52 +2,41 @@
 
 namespace Users\Services;
 
-use App\Models\Exam\Exam;
 use App\Abstratctions\Service;
 use App\Facades\MediaFacade;
 use App\Interfaces\ServiceStore;
 use App\Mail\MailService;
-use App\Repositories\ApplicationStatusRepositoryStore;
 use App\Repositories\SettingRepositoryShow;
 use App\Services\NotificationService;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Mail;
-use Mockery\Exception;
+use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Users\Models\User;
 use Users\Repositories\UserRepositoryShow;
 use Users\Repositories\UserRepositoryStore;
 
-/**
- *
- */
 class UserServiceStore extends Service implements ServiceStore
 {
-
     /**
      * Create a new Repository instance.
-     *
-     * @param UserRepositoryStore $userRepositoryStore
-     * @param UserRepositoryShow $userRepositoryShow
      */
-    public function __construct(UserRepositoryStore              $userRepositoryStore, UserRepositoryShow $userRepositoryShow, User $model,
-                                NotificationService              $notificationService, SettingRepositoryShow $settingRepositoryShow,
-                                ApplicationStatusRepositoryStore $applicationStatusRepositoryStore)
-    {
-        $this->userRepositoryStore = $userRepositoryStore;
-        $this->userRepositoryShow = $userRepositoryShow;
-        $this->model = $model;
-        $this->settingRepositoryShow = $settingRepositoryShow;
-        $this->notificationService = $notificationService;
-        $this->applicationStatusRepositoryStore = $applicationStatusRepositoryStore;
-
-    }
+    public function __construct(
+        protected UserRepositoryStore $userRepositoryStore,
+        protected UserRepositoryShow $userRepositoryShow,
+        protected User $model,
+        protected NotificationService $notificationService,
+        protected SettingRepositoryShow $settingRepositoryShow,
+    ) {}
 
     /**
      * Use save data into Repository
      *
-     * @param Request $request
-     * @return Boolean
+     * @return bool
      */
     public function save(Request $request)
     {
@@ -57,19 +46,27 @@ class UserServiceStore extends Service implements ServiceStore
             $status = getDefaultRegistrationStatus();
         }
 
-        $request->merge([
+        $payload = $request->only([
+            'name',
+            'user_name',
+            'email',
+            'mobile',
+            'password',
+        ]);
+        $payload = array_merge($payload, [
             'type' => 'user',
             'status' => $status,
-            'code' => uniqid(),
+            'code' => Str::random(40),
             'created_by' => $request->user()?->id,
         ]);
-        $payload = $request->all();
-        $payload['role'] = $request->input('role');
+        $payload['role'] = $request->user()?->hasRole('CRM Admin')
+            ? $request->input('role', 'User')
+            : 'User';
         $user = $this->userRepositoryStore->save($payload);
-        //assign role
+        // assign role
 
         if ($user) {
-            $this->userRepositoryStore->assignRole($user, $request->role ?? "User");
+            $this->userRepositoryStore->assignRole($user, $payload['role']);
             $setting = $this->settingRepositoryShow->find_by(['key' => 'notifications']);
             try {
                 if ($setting) {
@@ -77,39 +74,43 @@ class UserServiceStore extends Service implements ServiceStore
                     //    send mail to new accounts
                     if ($notify && $notify->new_account == 'on') {
                         try {
-                            $this->processSendMails($user, $request);
+                            $this->processSendMails($user);
                         } catch (\Exception $exception) {
-
+                            logger()->error('Failed to send new account notification email.', [
+                                'exception' => $exception,
+                            ]);
                         }
                     }
                 }
             } catch (\Exception $exception) {
+                logger()->error('Failed to process new account notification setting.', [
+                    'exception' => $exception,
+                ]);
             }
-
 
             MediaFacade::mediafiles($request, $user);
         }
+
         return $user;
 
     }
 
-
-    /**
-     * @param $user
-     * @param $request
-     * @param $queue
-     * @return void
-     */
-    public function processSendMails($user, $request, $queue = false): void
+    private function shouldValidateEmail($user): bool
     {
-        if ($user->slug === 0 || $user->slug === "0") {
-            $validateEmail = false;
-        } elseif ($user->slug === 1 || $user->slug === "1") {
-            $validateEmail = true;
-        } else {
-            $validateEmail = validateMail($user->email);
+        if ($user->slug === 0 || $user->slug === '0') {
+            return false;
         }
-        if ($validateEmail) {
+
+        if ($user->slug === 1 || $user->slug === '1') {
+            return true;
+        }
+
+        return validateMail($user->email);
+    }
+
+    public function processSendMails($user): void
+    {
+        if ($this->shouldValidateEmail($user)) {
             $mailService = new MailService(
                 subject: 'Welcome Email',
                 template: 'welcome',
@@ -119,48 +120,9 @@ class UserServiceStore extends Service implements ServiceStore
         }
     }
 
-
-    /**
-     * @param $user
-     * @param $request
-     * @param $queue
-     * @return void
-     */
-    public function processApprovedMail($user, $request, $queue = false): void
+    public function userAcceptContract($user): void
     {
-        if ($user->slug === 0 || $user->slug === "0") {
-            $validateEmail = false;
-        } elseif ($user->slug === 1 || $user->slug === "1") {
-            $validateEmail = true;
-        } else {
-            $validateEmail = validateMail($user->email);
-        }
-        if ($validateEmail) {
-            $mailService = new MailService(
-                subject: 'Competency Exam',
-                template: 'competency_exam',
-                data: ['examLink' => route('dashboard.exams.start')]
-            );
-            $mailService->sendMail($user->email, false);
-        }
-    }
-
-    /**
-     * @param $user
-     * @param $request
-     * @param $queue
-     * @return void
-     */
-    public function userAcceptContract($user, $request, $queue = false): void
-    {
-        if ($user->slug === 0 || $user->slug === "0") {
-            $validateEmail = false;
-        } elseif ($user->slug === 1 || $user->slug === "1") {
-            $validateEmail = true;
-        } else {
-            $validateEmail = validateMail($user->email);
-        }
-        if ($validateEmail) {
+        if ($this->shouldValidateEmail($user)) {
             $mailService = new MailService(
                 subject: 'congratulation',
                 template: 'user_accept_contract',
@@ -170,47 +132,21 @@ class UserServiceStore extends Service implements ServiceStore
         }
     }
 
-    /**
-     * @param $user
-     * @param $request
-     * @param $queue
-     * @return void
-     */
-    public function processSendOfferMail($user, $request, $queue = false): void
+    public function processSendOfferMail($user): void
     {
-        if ($user->slug === 0 || $user->slug === "0") {
-            $validateEmail = false;
-        } elseif ($user->slug === 1 || $user->slug === "1") {
-            $validateEmail = true;
-        } else {
-            $validateEmail = validateMail($user->email);
-        }
-        if ($validateEmail) {
+        if ($this->shouldValidateEmail($user)) {
             $mailService = new MailService(
                 subject: 'Contract',
                 template: 'contract',
                 data: ['link' => route('dashboard'), 'name' => $user->first_name]
             );
-            $res = $mailService->sendMail($user->email, false);
+            $mailService->sendMail($user->email, false);
         }
     }
 
-    /**
-     * @param $user
-     * @param $request
-     * @param $queue
-     * @return void
-     */
-    public function processRejectedMailDoesntMeetRequirements($user, $request, $queue = false): void
+    public function processRejectedMailDoesntMeetRequirements($user): void
     {
-        if ($user->slug === 0 || $user->slug === "0") {
-            $validateEmail = false;
-        } elseif ($user->slug === 1 || $user->slug === "1") {
-            $validateEmail = true;
-        } else {
-            $validateEmail = validateMail($user->email);
-        }
-        if ($validateEmail) {
+        if ($this->shouldValidateEmail($user)) {
             $mailService = new MailService(
                 subject: 'Reject Email',
                 template: 'application_rejected_doesnt_meed_requirements',
@@ -220,22 +156,9 @@ class UserServiceStore extends Service implements ServiceStore
         }
     }
 
-    /**
-     * @param $user
-     * @param $request
-     * @param $queue
-     * @return void
-     */
-    public function processRejectedMailAfterCompetency($user, $request, $queue = false): void
+    public function processRejectedMailAfterCompetency($user): void
     {
-        if ($user->slug === 0 || $user->slug === "0") {
-            $validateEmail = false;
-        } elseif ($user->slug === 1 || $user->slug === "1") {
-            $validateEmail = true;
-        } else {
-            $validateEmail = validateMail($user->email);
-        }
-        if ($validateEmail) {
+        if ($this->shouldValidateEmail($user)) {
             $mailService = new MailService(
                 subject: 'Reject Email',
                 template: 'application_rejected_after_competency',
@@ -245,25 +168,30 @@ class UserServiceStore extends Service implements ServiceStore
         }
     }
 
-
     /**
-     * @param $id
-     * @param Request $request
-     * @return \Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Eloquent\Builder[]|\Illuminate\Database\Eloquent\Collection|\Illuminate\Database\Eloquent\Model
+     * @return Builder|Builder[]|Collection|Model
      */
     public function update($id, Request $request)
     {
         $decodedId = hid_decode($id) ?? $id;
         $data = $request->only($this->model->getFillable());
         $userObject = $this->userRepositoryShow->find($decodedId);
-        if ($userObject->approve == 1 && auth()->user()->hasRole('User'))
+        $currentUser = $request->user() ?? auth()->user();
+        if ($userObject->approve == 1 && $currentUser?->hasRole('User')) {
             return false;
+        }
+        $role = $request->input('role');
+        if ($role) {
+            abort_unless($currentUser?->hasRole('CRM Admin'), 403);
+        }
         $user = $this->userRepositoryStore->update($decodedId, $data);
         if ($user) {
-            if ($request->role)
-                $this->userRepositoryStore->syncRole($userObject, $request->role);
+            if ($role) {
+                $this->userRepositoryStore->syncRole($userObject, $role);
+            }
             MediaFacade::mediafiles($request, $userObject);
         }
+
         return $user;
     }
 
@@ -271,36 +199,26 @@ class UserServiceStore extends Service implements ServiceStore
     {
         $decodedId = hid_decode($id) ?? $id;
         $userObject = $this->userRepositoryShow->find($decodedId);
-//        $data = $request->only($this->model->getFillable());
-        if ($request->religion != 'muslim') {
-            $request->merge(['approve' => 0]);
-            $this->applicationStatusRepositoryStore->save([
-                'status' => 'rejected',
-                'reason' => 'non-muslim',
-                'user_id' => $decodedId,
-            ]);
-            try {
-                $this->processRejectedMailDoesntMeetRequirements($userObject, $request);
-            } catch (\Exception $exception) {
-
-            }
+        $data = method_exists($request, 'validated')
+            ? $request->validated()
+            : $request->only(['name', 'user_name', 'email', 'mobile']);
+        $data['type'] = 'user';
+        if ($request->user()?->hasRole('HR')) {
+            $data['approve'] = 2;
         }
-//        if ($userObject->approve == 1)
-//            return false;
-        $user = $this->userRepositoryStore->update($decodedId, $request->all());
+        $user = $this->userRepositoryStore->update($decodedId, $data);
         if ($user) {
-//            if ($request->role)
-//                $this->userRepositoryStore->syncRole($userObject, $request->role);
-            MediaFacade::mediafiles(new Request($request->only(['delete', 'avatar'])), $userObject);
+            //            if ($request->role)
+            //                $this->userRepositoryStore->syncRole($userObject, $request->role);
+            MediaFacade::mediafiles($request, $userObject);
         }
+
         return $user;
 
     }
 
     /**
-     * @param $id
-     * @param Request $request
-     * @return false|\Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Eloquent\Builder[]|\Illuminate\Database\Eloquent\Collection|\Illuminate\Database\Eloquent\Model
+     * @return false|Builder|Builder[]|Collection|Model
      */
     public function updatePassword($id, Request $request)
     {
@@ -308,6 +226,7 @@ class UserServiceStore extends Service implements ServiceStore
         try {
             $data = ['password' => Hash::make($request->password)];
             $user = $this->userRepositoryStore->update($id, $data);
+
             return $user;
         } catch (\Exception $exception) {
             return false;
@@ -317,14 +236,14 @@ class UserServiceStore extends Service implements ServiceStore
     /**
      * Remove data from the Repository
      *
-     * @param Request $request
-     * @param Int $id
-     * @return Boolean
+     * @param  int  $id
+     * @return bool
      */
     public function delete(Request $request, $id = null)
     {
         $this->clean_request($request);
         $delete = $this->userRepositoryStore->delete($id, $request->all());
+
         return $delete;
     }
 
@@ -339,15 +258,15 @@ class UserServiceStore extends Service implements ServiceStore
         }
 
         $string = strtolower((string) $value);
+
         return $string === 'active' ? 1 : ($string === 'pending' ? 0 : null);
     }
 
     /**
      * freeze data from the Repository
      *
-     * @param Request $request
-     * @param Int $id
-     * @return Boolean
+     * @param  int  $id
+     * @return bool
      */
     public function freeze(Request $request, $id = null)
     {
@@ -356,11 +275,35 @@ class UserServiceStore extends Service implements ServiceStore
         $until = $request->input('banned_until');
 
         $data = [];
-        if ($mode === 'until' && $until) {
+        if (! in_array($mode, ['forever', 'until'], true)) {
+            throw ValidationException::withMessages([
+                'mode' => __('Invalid freeze mode.'),
+            ]);
+        }
+
+        if ($mode === 'until') {
+            if (! $until) {
+                throw ValidationException::withMessages([
+                    'banned_until' => __('Invalid banned until date.'),
+                ]);
+            }
+
             // Time-bound suspension: rely on banned_until; do not set freeze flag so it auto-unlocks after date
-            $data['banned_until'] = \Carbon\Carbon::parse($until);
+            try {
+                $bannedUntil = Carbon::parse($until);
+            } catch (\Throwable) {
+                throw ValidationException::withMessages([
+                    'banned_until' => __('Invalid banned until date.'),
+                ]);
+            }
+            if (! $bannedUntil->isFuture()) {
+                throw ValidationException::withMessages([
+                    'banned_until' => __('Invalid banned until date.'),
+                ]);
+            }
+            $data['banned_until'] = $bannedUntil;
             $data['freeze'] = 0; // ensure auto unfreeze by date
-        } else {
+        } elseif ($mode === 'forever') {
             // Forever until admin unfreezes
             $data['freeze'] = 1;
             $data['banned_until'] = null;
@@ -372,139 +315,77 @@ class UserServiceStore extends Service implements ServiceStore
     /**
      * activate data from the Repository
      *
-     * @param Request $request
-     * @param Int $id
-     * @return \Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Eloquent\Builder[]|\Illuminate\Database\Eloquent\Collection|\Illuminate\Database\Eloquent\Model
+     * @param  int  $id
+     * @return Builder|Builder[]|Collection|Model
      */
-
     public function activate(Request $request, $id = null)
     {
         $this->clean_request($request);
         $data = ['status' => 1];
+
         return $this->userRepositoryStore->update($id, $data, $request->all());
     }
 
     /**
      * approve data from the Repository
      *
-     * @param Request $request
-     * @param Int $id
-     * @return \Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Eloquent\Builder[]|\Illuminate\Database\Eloquent\Collection|\Illuminate\Database\Eloquent\Model
+     * @param  int  $id
+     * @return Builder|Builder[]|Collection|Model
      */
-
     public function approve(Request $request, $id = null)
     {
         $this->clean_request($request);
         $data = ['approve' => true];
-        $res = $this->userRepositoryStore->update($id, $data, $request->all());
-        $this->applicationStatusRepositoryStore->save([
-            'status' => 'approved',
-            'reason' => 'Made By ' . auth()->user()->user_name,
-            'user_id' => $id,
-            'changed_by' => auth()->user()->id,
-        ]);
-        $user = $this->userRepositoryShow->find($id);
-        try {
-            $this->processApprovedMail($user, $request);
-        } catch (\Exception $exception) {
 
-        }
-
-        return $res;
+        return $this->userRepositoryStore->update($id, $data, $request->all());
     }
 
     /**
      * de activate data from the Repository
      *
-     * @param Request $request
-     * @param Int $id
-     * @return \Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Eloquent\Builder[]|\Illuminate\Database\Eloquent\Collection|\Illuminate\Database\Eloquent\Model
+     * @param  int  $id
+     * @return Builder|Builder[]|Collection|Model
      */
-
     public function deActivate(Request $request, $id = null)
     {
         $this->clean_request($request);
         $data = ['status' => 0];
         $activate = $this->userRepositoryStore->update($id, $data, $request->all());
+
         return $activate;
     }
 
     /**
      * unApprove data from the Repository
      *
-     * @param Request $request
-     * @param Int $id
-     * @return \Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Eloquent\Builder[]|\Illuminate\Database\Eloquent\Collection|\Illuminate\Database\Eloquent\Model
+     * @param  int  $id
+     * @return Builder|Builder[]|Collection|Model
      */
-
     public function unApprove(Request $request, $id = null)
     {
         $this->clean_request($request);
         $data = ['approve' => false];
-        $this->applicationStatusRepositoryStore->save([
-            'status' => 'rejected',
-            'reason' => 'Made By ' . auth()->user()->user_name,
-            'user_id' => $id,
-            'changed_by' => auth()->user()->id,
-        ]);
-        $activate = $this->userRepositoryStore->update($id, $data, $request->all());
-        $user = $this->userRepositoryShow->find($id);
-        try {
-            $this->processRejectedMailDoesntMeetRequirements($user, $request);
-        } catch (\Exception $exception) {
 
-        }
-        return $activate;
+        return $this->userRepositoryStore->update($id, $data, $request->all());
     }
 
     /**
-     * @param Request $request
-     * @param $id
-     * @return \Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Eloquent\Builder[]|\Illuminate\Database\Eloquent\Collection|\Illuminate\Database\Eloquent\Model
+     * @return Builder|Builder[]|Collection|Model
      */
     public function un_freeze(Request $request, $id = null)
     {
         $data = ['freeze' => 0, 'banned_until' => null];
         $this->clean_request($request);
         $delete = $this->userRepositoryStore->update($id, $data, $request->all());
+
         return $delete;
     }
 
     /**
-     * @param Request $request
-     * @param $id
      * @return mixed
      */
     public function restore(Request $request, $id = null)
     {
-        $restored = $this->repo->restore($request, $id);
-        return $restored;
-    }
-
-    public function assignToExam(User $user, Exam $exam): void
-    {
-
-        $user->exams()->attach($exam->id, [
-            "attempts" => 0,
-            "remaining_time" => $exam->duration,
-            'active' => 1,
-        ]);
-        storeLogs('$user 342', $user);
-//        $this->userServiceStore->sendMail(
-//            $user->email,
-//            'Competency Exam ... ',
-//            'competency_exam',
-//            ['examLink' => route('dashboard.exams.start')],
-//            true,
-//        );
-
-//        $mailService = new MailService(
-//            subject: 'Competency Exam',
-//            template: 'competency_exam',
-//            data: ['examLink' => route('dashboard.exams.start')]
-//        );
-//        $mailService->sendMail($user->email, false);
-        storeLogs('$mailService 357', '$mailService');
-//        $this->processApprovedMail($user, $exam);
+        return $this->userRepositoryStore->restore($request, $id);
     }
 }

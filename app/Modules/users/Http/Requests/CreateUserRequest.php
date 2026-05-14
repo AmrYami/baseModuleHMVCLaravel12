@@ -4,10 +4,10 @@ namespace Users\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Password;
+use Users\Models\Role;
 
 class CreateUserRequest extends FormRequest
 {
-
     public function authorize()
     {
         return true;
@@ -15,16 +15,18 @@ class CreateUserRequest extends FormRequest
 
     protected function prepareForValidation(): void
     {
-        $this->merge([
-            'role' => hid_decode($this->input('role')) ?? $this->input('role'),
-        ]);
+        if ($this->has('role')) {
+            $this->merge([
+                'role' => hid_decode($this->input('role')) ?? $this->input('role'),
+            ]);
+        }
     }
 
     public function rules(): array
     {
 
         return [
-//            'name' => 'required|array',
+            //            'name' => 'required|array',
             'user_name' => 'required|max:255|regex:/^(?!\d)[A-Za-z0-9._]+$/|unique:users,user_name',
             'email' => [
                 'required',
@@ -34,28 +36,28 @@ class CreateUserRequest extends FormRequest
                 'unique:users,email',
 
                 // ← ZeroBounce check runs here, with the actual email value
-//                function ($attribute, $value, $fail) {
-//                    $apiKey  = env('ZERO_BOUNCE_API', '');
-//                    $baseUrl = rtrim(env('ZERO_URL', ''), '/');
-//
-//                    $response = Http::withHeaders([
-//                        'Content-Type' => 'application/json',
-//                    ])->get("$baseUrl/validate", [
-//                        'api_key' => $apiKey,
-//                        'email'   => $value,
-//                    ]);
-//
-//                    // if the HTTP call failed or the status isn’t valid/unknown
-//                    if ($response->failed()
-//                        || ! in_array(
-//                            $response->json('status', ''),
-//                            ['valid', 'unknown', 'catch-all'],
-//                            true
-//                        )
-//                    ) {
-//                        $fail('The provided email address could not be verified by our provider.');
-//                    }
-//                },
+                //                function ($attribute, $value, $fail) {
+                //                    $apiKey  = env('ZERO_BOUNCE_API', '');
+                //                    $baseUrl = rtrim(env('ZERO_URL', ''), '/');
+                //
+                //                    $response = Http::withHeaders([
+                //                        'Content-Type' => 'application/json',
+                //                    ])->get("$baseUrl/validate", [
+                //                        'api_key' => $apiKey,
+                //                        'email'   => $value,
+                //                    ]);
+                //
+                //                    // if the HTTP call failed or the status isn’t valid/unknown
+                //                    if ($response->failed()
+                //                        || ! in_array(
+                //                            $response->json('status', ''),
+                //                            ['valid', 'unknown', 'catch-all'],
+                //                            true
+                //                        )
+                //                    ) {
+                //                        $fail('The provided email address could not be verified by our provider.');
+                //                    }
+                //                },
             ],
             'mobile' => [
                 'required',
@@ -66,6 +68,7 @@ class CreateUserRequest extends FormRequest
                 'unique:users,mobile',
             ],
             'status' => 'nullable|in:0,1',
+            'role' => ['nullable', 'exists:roles,id'],
             'password' => [
                 'required', 'string', 'confirmed',
                 // Strong password requirements:
@@ -73,8 +76,8 @@ class CreateUserRequest extends FormRequest
                     ->mixedCase()      // upper & lower
                     ->letters()        // at least one letter
                     ->numbers()        // at least one number
-                    ->symbols()        // at least one symbol
-//                    ->uncompromised(), // checks against known leaks
+                    ->symbols(),        // at least one symbol
+                //                    ->uncompromised(), // checks against known leaks
             ],
             'password_confirmation' => 'same:password',
         ];
@@ -92,7 +95,6 @@ class CreateUserRequest extends FormRequest
             'password.uncompromised' => 'This password has appeared in a data leak. Please choose a different one.',
 
             'mobile.regex' => 'Mobile must be a valid Saudi number, e.g. 05XXXXXXXX or +9665XXXXXXXX.',
-
 
         ];
     }
@@ -115,7 +117,7 @@ class CreateUserRequest extends FormRequest
 
         // Fallback: compare against the configured 'User' role id if present
         $userRoleId = Role::where('name', 'User')->value('id');
+
         return $userRoleId && (string) $roleId === (string) $userRoleId;
     }
-
 }

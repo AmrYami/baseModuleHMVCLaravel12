@@ -1,5 +1,7 @@
 <?php
 
+use Users\Models\User;
+
 return [
 
     /*
@@ -40,14 +42,16 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
-        'doctor' => [
-            'driver' => 'session',
-            'provider' => 'doctors',
-        ],
+        // Madrasty mobile API authenticates via Laravel Passport
+        // (OAuth2 Password Grant). Login accepts email OR mobile as the
+        // `username` parameter — see User::findForPassport(). The legacy
+        // `jwt` driver from tymon/jwt-auth stays installed but is no
+        // longer the default api guard; it's retained only for any
+        // basemodule code paths that still reference it explicitly.
         'api' => [
-            'driver' => 'jwt',
+            'driver' => 'passport',
             'provider' => 'users',
-//            'hash' => false,
+            'hash' => false,
         ],
     ],
 
@@ -71,12 +75,7 @@ return [
     'providers' => [
         'users' => [
             'driver' => 'eloquent',
-            'model' => \Users\Models\User::class,
-        ],
-
-        'doctors' => [
-            'driver' => 'eloquent',
-            'model' => \Users\Models\Doctor::class,
+            'model' => User::class,
         ],
 
         // 'users' => [

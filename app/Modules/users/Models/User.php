@@ -3,19 +3,16 @@
 namespace Users\Models;
 
 use App\Enum\DefaultValuesEnum;
-use App\Models\ApplicationStatus;
 use App\Models\BaseAuthModel;
-use App\Models\Exam\Exam;
 
 //use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Users\Models\RequestModel;
 use App\Notifications\ResetPassword;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Jetstream\HasProfilePhoto;
 use Laravel\Jetstream\HasTeams;
-use Laravel\Sanctum\HasApiTokens;
+use Laravel\Passport\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 use Illuminate\Notifications\Notifiable;
@@ -182,4 +179,34 @@ class User extends BaseAuthModel implements HasMedia, JWTSubject
         return [];
     }
 
+    /**
+     * Resolve the user for Passport's Password Grant by email OR mobile.
+     *
+     * Madrasty users register with both `email` and `mobile` (both unique).
+     * The Flutter app may post either as the OAuth `username`, and Passport
+     * calls this method to look the user up.
+     *
+     * Lives on this model — not just on App\Models\User — because
+     * config/auth.php's `users` provider maps to \Users\Models\User::class
+     * and Passport calls findForPassport() on the configured provider's
+     * model, not on App\Models\User.
+     *
+     * Passport's UserRepository invokes this with the OAuth client entity
+     * as the second argument; we accept it but currently don't restrict
+     * users by client. The closure around the email/mobile OR is required
+     * so SoftDeletes' global `deleted_at IS NULL` scope binds correctly:
+     * without it, SQL operator precedence would let a soft-deleted user
+     * authenticate when their mobile happens to match.
+     */
+    public function findForPassport(
+        string $username,
+        ?\League\OAuth2\Server\Entities\ClientEntityInterface $client = null,
+    ): ?self {
+        return static::query()
+            ->where(function ($q) use ($username): void {
+                $q->where('email', $username)
+                    ->orWhere('mobile', $username);
+            })
+            ->first();
+    }
 }

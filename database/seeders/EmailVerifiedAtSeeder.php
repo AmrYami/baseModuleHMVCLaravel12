@@ -14,7 +14,11 @@ class EmailVerifiedAtSeeder extends Seeder
      */
     public function run(): void
     {
-        // Update every user where email_verified_at IS NULL
+        // Auto-verifying every account is only safe for local/testing.
+        if (! app()->environment(['local', 'testing'])) {
+            return;
+        }
+
         DB::table('users')
             ->whereNull('email_verified_at')
             ->update([

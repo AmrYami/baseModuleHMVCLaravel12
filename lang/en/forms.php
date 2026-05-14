@@ -1,6 +1,6 @@
 <?php
 
 return [
-    'name' => 'name',
+    'name' => 'Name',
     'save' => 'Save',
 ];

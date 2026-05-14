@@ -2,13 +2,13 @@
     <div class="form-group col-md-6 col-12 mt-2">
         <!--begin::Input group-->
         <div class="form-floating">
-            <input type="text" class="form-control"
+            <input id="role_name" type="text" class="form-control"
             name='name' placeholder="@lang('forms.Name')"
                     value="{{ $role->name??(old('name')??'') }}"
                     maxlength="255" minlength="1" autocomplete="off"
                     @if(isset($role->id) && in_array($role->id , [1,2,3,4])) readonly @endif
                      required/>
-            <label for="floatingInput">Name (English) <span class='text-danger'>*</span></label>
+            <label for="role_name">Name (English) <span class='text-danger'>*</span></label>
         </div>
         @if ($errors->has('name'))
             <small class="text-danger">{{ $errors->first('name') }}</small>

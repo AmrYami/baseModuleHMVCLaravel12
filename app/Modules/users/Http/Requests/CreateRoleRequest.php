@@ -3,7 +3,6 @@
 namespace Users\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Facades\Auth;
 
 class CreateRoleRequest extends FormRequest
 {
@@ -15,7 +14,7 @@ class CreateRoleRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|max:255|unique:roles,name',
+            'name' => 'required|string|max:255|unique:roles,name',
         ];
     }
 }

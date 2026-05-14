@@ -48,7 +48,7 @@
                         :name="'company_id'"
                         :options='$companies'
                         :label="'Company'"
-                        :selected="old('religion', $user->company_id ?? '')"
+                        :selected="old('company_id', $user->company_id ?? '')"
                     />
                 </div>
 

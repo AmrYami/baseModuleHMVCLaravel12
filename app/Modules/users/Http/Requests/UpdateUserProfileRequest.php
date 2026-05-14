@@ -14,7 +14,8 @@ class UpdateUserProfileRequest extends FormRequest
 
     public function rules(): array
     {
-        $userId = hid_decode($this->route('id')) ?? $this->route('id');
+        $routeId = $this->route('id') ?? $this->route('user');
+        $userId = hid_decode($routeId) ?? $routeId;
 
         return [
             'name.en' => ['required', 'string', 'max:255'],

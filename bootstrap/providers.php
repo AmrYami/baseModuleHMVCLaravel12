@@ -1,17 +1,26 @@
 <?php
 
+use App\Providers\AliasServiceProvider;
+use App\Providers\AppServiceProvider;
+use App\Providers\AuthServiceProvider;
+use App\Providers\FortifyServiceProvider;
+use App\Providers\JetstreamServiceProvider;
+use App\Providers\ViewServiceProvider;
+use Intervention\Image\Laravel\ServiceProvider;
+use Spatie\Html\HtmlServiceProvider;
+use Users\Providers\UserServiceProvider;
+
 return [
-    App\Providers\AliasServiceProvider::class,
-    App\Providers\AppServiceProvider::class,
-    App\Providers\ViewServiceProvider::class,
-    App\Providers\AuthServiceProvider::class,
-//    App\Providers\EventServiceProvider::class,
-    App\Providers\FortifyServiceProvider::class,
-    App\Providers\JetstreamServiceProvider::class,
-    Spatie\Html\HtmlServiceProvider::class,
-    Users\Providers\UserServiceProvider::class,
+    AliasServiceProvider::class,
+    AppServiceProvider::class,
+    ViewServiceProvider::class,
+    AuthServiceProvider::class,
+    //    App\Providers\EventServiceProvider::class,
+    FortifyServiceProvider::class,
+    JetstreamServiceProvider::class,
+    HtmlServiceProvider::class,
+    UserServiceProvider::class,
     Users\Providers\ViewServiceProvider::class,
-    App\Assessments\Support\AssessmentsServiceProvider::class,
-    Intervention\Image\ImageServiceProvider::class,
+    ServiceProvider::class,
 
 ];

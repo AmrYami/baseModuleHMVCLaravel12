@@ -1,6 +1,10 @@
 #!/bin/bash
 set -euo pipefail
-set -x
+
+# Set DEPLOY_DEBUG=1 to enable verbose command tracing during troubleshooting.
+if [[ "${DEPLOY_DEBUG:-0}" =~ ^(1|true|TRUE|yes|YES)$ ]]; then
+  set -x
+fi
 
 PHP_BIN="$(command -v php)"
 APP_DIR="/var/app/current"
@@ -30,41 +34,44 @@ fi
 # Ensure composer exists (download PHAR once if necessary)
 if ! command -v composer >/dev/null 2>&1; then
   echo "Composer not found; installing to /usr/local/bin/composer"
-  EXPECTED_SIGNATURE="$(curl -s https://composer.github.io/installer.sig)"
-  php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
-  ACTUAL_SIGNATURE="$(php -r 'echo hash_file("sha384", "composer-setup.php");')"
+  if ! EXPECTED_SIGNATURE="$(curl --fail --silent --show-error --location --retry 3 --retry-delay 2 --connect-timeout 10 --max-time 30 https://composer.github.io/installer.sig)"; then
+    rm -f composer-setup.php
+    exit 1
+  fi
+  if ! curl --fail --silent --show-error --location --retry 3 --retry-delay 2 --connect-timeout 10 --max-time 60 https://getcomposer.org/installer -o composer-setup.php; then
+    rm -f composer-setup.php
+    exit 1
+  fi
+  ACTUAL_SIGNATURE="$("$PHP_BIN" -r 'echo hash_file("sha384", "composer-setup.php");')"
   if [ "$EXPECTED_SIGNATURE" != "$ACTUAL_SIGNATURE" ]; then
     >&2 echo 'ERROR: Invalid composer installer signature'
     rm -f composer-setup.php
     exit 1
   fi
-  sudo php composer-setup.php --install-dir=/usr/local/bin --filename=composer
+  sudo "$PHP_BIN" composer-setup.php --install-dir=/usr/local/bin --filename=composer
   rm -f composer-setup.php
 fi
 
-sudo -u webapp COMPOSER_HOME="$APP_DIR" composer install --prefer-dist --no-dev --no-interaction --optimize-autoloader || true
+sudo -u webapp COMPOSER_HOME="$APP_DIR" composer install --prefer-dist --no-dev --no-interaction --optimize-autoloader
 
 # Set the correct ownership and permissions for Laravel's storage directory
 mkdir -p "$APP_DIR/storage/logs"
-chown -R webapp:webapp storage bootstrap/cache
-chmod -R 775 storage bootstrap/cache
-chown -R webapp:webapp "$APP_DIR/storage"
-chmod -R 775 "$APP_DIR/storage"
+chown -R webapp:webapp "$APP_DIR/storage" "$APP_DIR/bootstrap/cache"
+chmod -R 775 "$APP_DIR/storage" "$APP_DIR/bootstrap/cache"
 sudo -u webapp touch "$APP_DIR/storage/logs/laravel.log"
-chmod -R 775 "$APP_DIR/storage"
 
 # Run migrations with seeders (allow failure if DB is unavailable)
 # sudo -u webapp php artisan migrate --seed --force
 
 mkdir -p "$APP_DIR/storage/app/private"
 chown -R webapp:webapp "$APP_DIR/storage/app/private"
-chmod -R 0755 "$APP_DIR/storage/app/private"
+chmod -R 0770 "$APP_DIR/storage/app/private"
 
 run_artisan() {
-  sudo -u webapp php artisan "$@" || true
+  sudo -u webapp "$PHP_BIN" artisan "$@"
 }
 
-run_artisan permission:cache-reset
+run_artisan permission:cache-reset || true
 run_artisan view:clear
 run_artisan config:clear
 run_artisan route:clear

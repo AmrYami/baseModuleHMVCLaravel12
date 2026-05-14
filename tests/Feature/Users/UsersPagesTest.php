@@ -1,9 +1,9 @@
 <?php
 
-use Tests\Support\AuthHelpers;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Support\AuthHelpers;
+
 use function Pest\Laravel\actingAs;
-use function Pest\Laravel\get;
 
 uses(RefreshDatabase::class);
 uses(AuthHelpers::class);
@@ -36,8 +36,7 @@ it('renders Users edit page', function () {
     actingAs($hr, 'web')
         ->get(route('dashboard.users.edit', ['user' => $victim->id]))
         ->assertOk()
-        ->assertSee('Create New User') // title component reused
+        ->assertSee('Edit User')
         ->assertSee('name="user_name"', false)
         ->assertSee('name="email"', false);
 });
-

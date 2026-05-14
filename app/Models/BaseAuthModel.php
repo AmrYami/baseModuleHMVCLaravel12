@@ -2,56 +2,18 @@
 
 namespace App\Models;
 
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use App\Support\Concerns\UsesHashids;
 use App\Support\Concerns\LogsModelActivity;
-use Spatie\Activitylog\LogOptions;
+use App\Support\Concerns\UsesHashids;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 use Spatie\Translatable\HasTranslations;
-use ReflectionClass;
 
 class BaseAuthModel extends Authenticatable
 {
     protected $connection = 'mysql';
 
-
-    use LogsModelActivity;
     use HasTranslations;
+    use LogsModelActivity;
     use UsesHashids;
-
-
-    protected static $logName;
-
-    // Automatically initialize logging
-    protected static function boot()
-    {
-        parent::boot();
-        static::retrieved(function ($model) {
-            $model->init();
-        });
-    }
-
-    public function init()
-    {
-        self::$logName = get_called_class();
-    }
-
-    public function getActivitylogOptions(): LogOptions
-    {
-        return LogOptions::defaults()
-            ->logOnly($this->getFillableAttributes());
-    }
-
-    /**
-     * Get the fillable attributes of the child model dynamically.
-     */
-    protected function getFillableAttributes(): array
-    {
-        $reflection = new ReflectionClass($this);
-        $property = $reflection->getProperty('fillable');
-        $property->setAccessible(true);
-
-        return $property->getValue($this);
-    }
 
     public function asJson($value, $flags = 0)
     {

@@ -1,9 +1,12 @@
 <?php
+
 namespace App\Actions\Fortify;
 
+use App\Models\User;
+use Carbon\Carbon;
+use Carbon\CarbonInterface;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use App\Models\User;
 use Illuminate\Validation\ValidationException;
 
 class LoginWithEmailOrUsername
@@ -27,14 +30,14 @@ class LoginWithEmailOrUsername
 
             if ((int) ($user->freeze ?? 0) === 1) {
                 throw ValidationException::withMessages([
-                    'email' => __('Your account has been freezed.'),
+                    'email' => __('Your account has been frozen.'),
                 ]);
             }
 
             if ($user->banned_until && now()->lessThan($user->banned_until)) {
-                $until = $user->banned_until instanceof \Carbon\CarbonInterface
+                $until = $user->banned_until instanceof CarbonInterface
                     ? $user->banned_until
-                    : \Carbon\Carbon::parse($user->banned_until);
+                    : Carbon::parse($user->banned_until);
                 $seconds = max(0, $until->getTimestamp() - now()->getTimestamp());
                 $daysFloat = number_format($seconds / 86400, 2, '.', '');
                 throw ValidationException::withMessages([

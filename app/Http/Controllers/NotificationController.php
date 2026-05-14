@@ -22,11 +22,14 @@ class NotificationController extends Controller
 //        $this->middleware('auth')->except('last', 'dismiss');
     }
 
-    public function testNotinficationsWithWebPush(Request $request, NotificationService $notificationService,
-                                                  User $user){
-        $url = 'users/' . '?seen=1';
-        $user_id = 1;
-        $notificationService->notificationAction($user_id, $request, $url, $user);
+    public function testNotinficationsWithWebPush(Request $request, NotificationService $notificationService, User $user)
+    {
+        $url = 'users/?seen=1';
+        $authenticatedUser = $request->user();
+        if (! $authenticatedUser) {
+            abort(401);
+        }
+        $notificationService->notificationAction($authenticatedUser->id, $request, $url, $user);
     }
 
     /**

@@ -16,7 +16,7 @@
 @extends('dashboard.mt.main')
 @section('content')
 
-<x-layout.mt.cards.basic :title="__('roles.Create New Role')">
+<x-layout.mt.cards.basic :title="__('roles.Edit Role')">
     <x-slot:toolbar>
         <x-layout.mt.buttons.back :url='route("dashboard.roles.index")'/>
     </x-slot:toolbar>

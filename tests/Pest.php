@@ -1,5 +1,14 @@
 <?php
 
+use App\Workflow\Http\Requests\WorkflowStepSubmissionRequest;
+use App\Workflow\Models\WorkflowStepInstance;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Route;
+use Spatie\Permission\PermissionRegistrar;
+use Tests\TestCase;
+use Users\Models\User;
+
 /*
 |--------------------------------------------------------------------------
 | Test Case
@@ -12,18 +21,22 @@
 */
 
 // Conditionally enable RefreshDatabase based on env
-$__pest = pest()->extend(Tests\TestCase::class);
-if (!env('PERSIST_TEST_DATA', false)) {
-    $__pest->use(Illuminate\Foundation\Testing\RefreshDatabase::class);
+$__pest = pest()->extend(TestCase::class);
+if (! env('PERSIST_TEST_DATA', false)) {
+    $__pest->use(RefreshDatabase::class);
 }
 $__pest->in('Feature', 'Unit');
 
 // Minimal named routes used by middleware in unit tests (kernel doesn't load app routes here)
 beforeAll(function () {
-    \Illuminate\Support\Facades\Route::get('/exams', fn() => 'exams')
+    Route::get('/exams', fn () => 'exams')
         ->name('assessments.candidate.exams.index');
-    \Illuminate\Support\Facades\Route::get('/rejected', fn() => 'rejected')
+    Route::get('/rejected', fn () => 'rejected')
         ->name('rejected');
+});
+
+beforeEach(function () {
+    $this->withoutVite();
 });
 
 /*
@@ -58,24 +71,24 @@ function something()
 }
 
 // Helper to conditionally apply RefreshDatabase within a test file
-if (!function_exists('useRefreshDatabaseConditionally')) {
+if (! function_exists('useRefreshDatabaseConditionally')) {
     function useRefreshDatabaseConditionally(): void
     {
-        if (!env('PERSIST_TEST_DATA', false)) {
-            uses(Illuminate\Foundation\Testing\RefreshDatabase::class);
+        if (! env('PERSIST_TEST_DATA', false)) {
+            uses(RefreshDatabase::class);
         }
     }
 }
 
 // Ensure a permission row compatible with our schema exists
-if (!function_exists('ensurePermission')) {
+if (! function_exists('ensurePermission')) {
     function ensurePermission(string $name, string $group = 'workflow', ?string $display = null, ?string $desc = null): void
     {
         $guard = config('auth.defaults.guard', 'web');
         $display = $display ?? $name;
         $desc = $desc ?? $name;
         // Insert directly to match custom columns (display_name, description, permission_group)
-        \Illuminate\Support\Facades\DB::table('permissions')->insertOrIgnore([
+        DB::table('permissions')->insertOrIgnore([
             'name' => $name,
             'display_name' => $display,
             'description' => $desc,
@@ -84,23 +97,32 @@ if (!function_exists('ensurePermission')) {
             'created_at' => now(),
             'updated_at' => now(),
         ]);
-        try { app(Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions(); } catch (\Throwable $e) {}
+        try {
+            app(PermissionRegistrar::class)->forgetCachedPermissions();
+        } catch (Throwable $e) {
+        }
     }
 }
 
 // Build a WorkflowStepSubmissionRequest bound to a given step instance and user
-if (!function_exists('buildWorkflowRequest')) {
-    function buildWorkflowRequest(App\Workflow\Models\WorkflowStepInstance $si, \Users\Models\User $user, array $payload, string $method = 'PUT')
+if (! function_exists('buildWorkflowRequest')) {
+    function buildWorkflowRequest(WorkflowStepInstance $si, User $user, array $payload, string $method = 'PUT')
     {
-        $req = App\Workflow\Http\Requests\WorkflowStepSubmissionRequest::create('/workflows/tasks/'.$si->id, $method, $payload);
-        $req->setUserResolver(fn() => $user);
+        $req = WorkflowStepSubmissionRequest::create('/workflows/tasks/'.$si->id, $method, $payload);
+        $req->setUserResolver(fn () => $user);
         // Minimal route resolver exposing parameter('stepInstance') for FormRequest::route()
         $req->setRouteResolver(function () use ($si) {
-            return new class($si) {
+            return new class($si)
+            {
                 public function __construct(private $si) {}
-                public function parameter(string $key) { return $key === 'stepInstance' ? $this->si : null; }
+
+                public function parameter(string $key)
+                {
+                    return $key === 'stepInstance' ? $this->si : null;
+                }
             };
         });
+
         return $req;
     }
 }

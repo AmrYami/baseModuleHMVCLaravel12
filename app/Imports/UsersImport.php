@@ -3,6 +3,7 @@
 namespace App\Imports;
 
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -173,7 +174,7 @@ class UsersImport implements ToModel, WithHeadingRow, WithChunkReading, WithVali
                 'user_name' => $row['user_name'],
                 'email' => $row['email'] ?? null,
                 'mobile' => $row['mobile'] ?? null,
-                'code' => uniqid(),
+                'code' => Str::random(40),
                 'password' => isset($row['password'])
                     ? Hash::make($row['password'])
                     : Hash::make(Str::random(12)),
@@ -189,20 +190,24 @@ class UsersImport implements ToModel, WithHeadingRow, WithChunkReading, WithVali
                 'BLS_certification' => $row['bls_certification'] ?? null,
                 'BLS_expiry_date' => $row['bls_expiry_date'],
                 'ACLS_certification' => $row['acls_certification'] ?? null,
-                'ACLS_expiry_date' => $row['acls_expiry_date'],
+                'ACLS_expiry_date' => $row['acls_expiry_date'] ?? null,
                 'created_by' => $this->user['id'],
                 'company_id' => $this->user['company_id'],
                 // leave `avatar` & `certificates`… see notes below
             ]);
-            $user->assignRole("User");
-            return $user;
+            DB::transaction(function () use ($user) {
+                $user->save();
+                $user->assignRole("User");
+            });
+            return null; // Already persisted; ToModel save would no-op
+
         } catch (Throwable $e) {
             // Capture the raw row + exception message
-//            $this->exceptions[] = [
-//                'row' => $row,
-//                'message' => $e->getMessage(),
-//                '__row_index' => $this->index,
-//            ];
+            $this->exceptions[] = [
+                'row' => $row,
+                'message' => $e->getMessage(),
+                '__row_index' => $this->index,
+            ];
             // Return null so import continues
             return null;
         }

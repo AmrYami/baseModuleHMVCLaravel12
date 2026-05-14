@@ -10,7 +10,7 @@ class ForceHttps
 {
     public function handle(Request $request, Closure $next): Response
     {
-        $force = (bool) env('FORCE_HTTPS', false);
+        $force = filter_var(env('FORCE_HTTPS', false), FILTER_VALIDATE_BOOLEAN);
 
         if ($force && ! $request->isSecure()) {
             return redirect()->secure($request->getRequestUri());
